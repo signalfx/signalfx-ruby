@@ -1,6 +1,7 @@
 # Ruby client library for SignalFx
 
 This is a programmatic interface in Ruby for SignalFx's metadata and ingest APIs. It is meant to provide a base for communicating with SignalFx APIs that can be easily leveraged by scripts and applications to interact with SignalFx or report metric and event data to SignalFx.
+Library supports Ruby 2.x versions
 
 ## Installation
 
@@ -26,7 +27,7 @@ To use this library, you need a SignalFx API access token, which can be obtained
 
 ### Create client
 
-The default constructor `SignalFx` uses Protobuf to send data to SignalFx. If it cannot send Protobuf, it falls back to sending JSON. 
+The default constructor `SignalFx` uses Protobuf to send data to SignalFx. If it cannot send Protobuf, it falls back to sending JSON.
 
 ```ruby
 require('signalfx');

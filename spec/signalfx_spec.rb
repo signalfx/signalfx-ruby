@@ -63,16 +63,16 @@ describe 'SignalFx(JSON mode)' do
     expect(@subject).to be_a SignalFxClient
   end
 
-  it 'should be should be send datapoints with all params' do
-    client = JsonSignalFx.new TOKEN, ingest_endpoint: 'https://custom_ingest.endpoint',
-                                    api_endpoint: 'https://custom_api.endpoint', timeout: 5,
+  it 'should be send datapoints with all params' do
+    client = JsonSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
+                                    api_endpoint: 'https://custom-api.endpoint', timeout: 5,
                                     batch_size: 5, user_agents: ["ua_1", "ua_2"]
     expect(client).to be_a SignalFxClient
 
     gauges = [{:metric => 'test.cpu', :value => 1}]
     counters = [{:metric => 'cpu_cnt', :value => 2}]
 
-    stub_request(:post, "https://custom_ingest.endpoint/v2/datapoint").
+    stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2}]}",
              :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/0.1.0, ua_1, ua_2', 'X-Sf-Token' => 'myToken'}).
         to_return(:status => 200, :body => "OK", :headers => {})
@@ -81,9 +81,9 @@ describe 'SignalFx(JSON mode)' do
     sleep(0.5)
   end
 
-  it 'should be should be send event with all params' do
-    client = JsonSignalFx.new TOKEN, ingest_endpoint: 'https://custom_ingest.endpoint',
-                                    api_endpoint: 'https://custom_api.endpoint', timeout: 5,
+  it 'should be send event with all params' do
+    client = JsonSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
+                                    api_endpoint: 'https://custom-api.endpoint', timeout: 5,
                                     batch_size: 5, user_agents: ["ua_1", "ua_2"]
     expect(client).to be_a SignalFxClient
 
@@ -95,7 +95,7 @@ describe 'SignalFx(JSON mode)' do
          instance: 'myinstance'}
     properties = {version: version}
 
-    stub_request(:post, "https://custom_api.endpoint/v1/event").
+    stub_request(:post, "https://custom-api.endpoint/v1/event").
         with(:body => "{\"eventType\":\"deployments\",\"dimensions\":{\"host\":\"myhost\",\"service\":\"myservice\",\"instance\":\"myinstance\"},\"properties\":{\"version\":\"12345\"}}",
              :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/0.1.0, ua_1, ua_2', 'X-Sf-Token' => 'myToken'}).
         to_return(:status => 200, :body => "OK", :headers => {})
@@ -203,16 +203,16 @@ describe 'SignalFx(Protobuf mode)' do
     expect(@subject).to be_a SignalFxClient
   end
 
-it 'should be should be send datapoints with all params' do
-    client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom_ingest.endpoint',
-                                    api_endpoint: 'https://custom_api.endpoint', timeout: 5,
+  it 'should be send datapoints with all params' do
+    client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
+                                    api_endpoint: 'https://custom-api.endpoint', timeout: 5,
                                     batch_size: 5, user_agents: ["ua_1", "ua_2"]
     expect(client).to be_a SignalFxClient
 
     gauges = [{:metric => 'test.cpu', :value => 1}]
     counters = [{:metric => 'cpu_cnt', :value => 2}]
 
-    stub_request(:post, "https://custom_ingest.endpoint/v2/datapoint").
+    stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
         with(:body => "\n\x10\x12\btest.cpu\"\x02\x18\x01(\x00\n\x0F\x12\acpu_cnt\"\x02\x18\x02(\x01",
              :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/0.1.0, ua_1, ua_2', 'X-Sf-Token' => 'myToken'}).
         to_return(:status => 200, :body => "OK", :headers => {})
@@ -221,13 +221,13 @@ it 'should be should be send datapoints with all params' do
     sleep(0.5)
   end
 
-  it 'should be should be send event with all params' do
-    client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom_ingest.endpoint',
-                                    api_endpoint: 'https://custom_api.endpoint', timeout: 5,
+  it 'should be send event with all params' do
+    client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
+                                    api_endpoint: 'https://custom-api.endpoint', timeout: 5,
                                     batch_size: 5, user_agents: ["ua_1", "ua_2"]
     expect(client).to be_a SignalFxClient
 
-     event_type = 'deployments'
+    event_type = 'deployments'
     version = '12345'
     dimensions =
         {host: 'myhost',
@@ -235,7 +235,7 @@ it 'should be should be send datapoints with all params' do
          instance: 'myinstance'}
     properties = {version: version}
 
-    stub_request(:post, "https://custom_api.endpoint/v1/event").
+    stub_request(:post, "https://custom-api.endpoint/v1/event").
         with(:body => "{\"eventType\":\"deployments\",\"dimensions\":{\"host\":\"myhost\",\"service\":\"myservice\",\"instance\":\"myinstance\"},\"properties\":{\"version\":\"12345\"}}",
              :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/0.1.0, ua_1, ua_2', 'X-Sf-Token' => 'myToken'}).
         to_return(:status => 200, :body => "OK", :headers => {})
