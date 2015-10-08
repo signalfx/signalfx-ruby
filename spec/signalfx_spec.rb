@@ -221,6 +221,24 @@ describe 'SignalFx(Protobuf mode)' do
     sleep(0.5)
   end
 
+  it 'should be send datapoints with all params async' do
+    client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
+                                  api_endpoint: 'https://custom-api.endpoint', timeout: 5,
+                                  batch_size: 5, user_agents: ["ua_1", "ua_2"]
+    expect(client).to be_a SignalFxClient
+
+    gauges = [{:metric => 'test.cpu', :value => 1}]
+    counters = [{:metric => 'cpu_cnt', :value => 2}]
+
+    stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
+        with(:body => "\n\x10\x12\btest.cpu\"\x02\x18\x01(\x00\n\x0F\x12\acpu_cnt\"\x02\x18\x02(\x01",
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/0.1.0, ua_1, ua_2', 'X-Sf-Token' => 'myToken'}).
+        to_return(:status => 200, :body => "OK", :headers => {})
+
+    client.send_async(gauges: gauges, counters: counters)
+    sleep(0.5)
+  end
+
   it 'should be send event with all params' do
     client = ProtoBufSignalFx.new TOKEN, ingest_endpoint: 'https://custom-ingest.endpoint',
                                     api_endpoint: 'https://custom-api.endpoint', timeout: 5,

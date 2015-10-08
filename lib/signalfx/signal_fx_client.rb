@@ -29,7 +29,8 @@ class SignalFxClient
     @async_running = false
   end
 
-  #Send the given metrics to SignalFx.
+  #Send the given metrics to SignalFx synchronously.
+  #You can use this method to send data via reporters such as Codahale style libraries
   #
   #Args:
   #    cumulative_counters (list): a list of dictionaries representing the
@@ -41,7 +42,53 @@ class SignalFxClient
     process_datapoint('gauge', gauges)
     process_datapoint('counter', counters)
 
-    send_async
+    data_points_list = []
+    while @queue.length > 0 && data_points_list.length < @batch_size
+      data_points_list << @queue.pop
+    end
+
+    data_to_send = batch_data(data_points_list)
+
+    begin
+      post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
+    ensure
+      @async_running = false
+    end
+  end
+
+  #Send the given metrics to SignalFx asynchronously.
+  #
+  #Args:
+  #    cumulative_counters (list): a list of dictionaries representing the
+  #                 cumulative counters to report.
+  #    gauges (list): a list of dictionaries representing the gauges to report.
+  #    counters (list): a list of dictionaries representing the counters to report.
+  def send_async(cumulative_counters: nil, gauges: nil, counters: nil)
+    process_datapoint('cumulative_counter', cumulative_counters)
+    process_datapoint('gauge', gauges)
+    process_datapoint('counter', counters)
+
+    if @async_running
+      return
+    end
+
+    data_points_list = []
+    while @queue.length > 0 && data_points_list.length < @batch_size
+      data_points_list << @queue.pop
+    end
+
+    data_to_send = batch_data(data_points_list)
+
+    @async_running = true
+
+    Thread.abort_on_exception = true
+    Thread.start {
+      begin
+        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
+      ensure
+        @async_running = false
+      end
+    }
   end
 
 
@@ -52,6 +99,9 @@ class SignalFxClient
   #    dimensions (dict): a map of event dimensions.
   #    properties (dict): a map of extra properties on that event.
   def send_event(event_type, dimensions: {}, properties: {})
+
+    #TODO: Add AWS Unique ID to dimensions array
+    #TODO: Add pre-defined dimensions to dimensions array
     data = {
         eventType: event_type,
         dimensions: dimensions,
@@ -76,30 +126,6 @@ class SignalFxClient
   end
 
   private
-
-  def send_async
-    if @async_running
-      return
-    end
-
-    data_points_list = []
-    while @queue.length > 0 && data_points_list.length < @batch_size
-      data_points_list << @queue.pop
-    end
-
-    data_to_send = batch_data(data_points_list)
-
-    @async_running = true
-
-    Thread.abort_on_exception = true
-    Thread.start {
-      begin
-        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
-      ensure
-        @async_running = false
-      end
-    }
-  end
 
   def post(data_to_send, url, suffix, content_type = nil)
     uri = URI.parse(url + '/' + suffix)
@@ -135,6 +161,8 @@ class SignalFxClient
 
   def process_datapoint(metric_type, data_points)
     if data_points != nil && data_points.kind_of?(Array)
+      #TODO: Add AWS Unique ID to each datapoint
+      #TODO: Add pre-defined dimensions to each datapoint
       data_points.each { |datapoint| add_to_queue(metric_type, datapoint) }
     end
   end
