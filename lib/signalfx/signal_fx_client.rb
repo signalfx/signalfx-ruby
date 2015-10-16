@@ -6,6 +6,7 @@ require 'signalfx/conf'
 require 'net/http'
 require 'uri'
 require 'openssl'
+require 'rest-client'
 
 class SignalFxClient
   HEADER_API_TOKEN_KEY = 'X-SF-Token'
@@ -14,7 +15,7 @@ class SignalFxClient
   INGEST_ENDPOINT_SUFFIX = 'v2/datapoint'
   API_ENDPOINT_SUFFIX = 'v1/event'
 
-  def initialize(api_token, ingest_endpoint: Config::DEFAULT_INGEST_ENDPOINT,
+  def initialize(api_token, enable_aws_unique_id: false, ingest_endpoint: Config::DEFAULT_INGEST_ENDPOINT,
                  api_endpoint: Config::DEFAULT_API_ENDPOINT, timeout: Config::DEFAULT_TIMEOUT,
                  batch_size: Config::DEFAULT_BATCH_SIZE, user_agents: [])
 
@@ -25,8 +26,23 @@ class SignalFxClient
     @batch_size = batch_size
     @user_agents = user_agents
 
+    @aws_unique_id = nil
+
     @queue = Queue.new
     @async_running = false
+
+    if enable_aws_unique_id
+      retrieve_aws_unique_id { |request|
+        if request != nil
+          json_resp = JSON.parse(request.body)
+          @aws_unique_id = json_resp['instanceId']+'_'+json_resp['region']+'_'+json_resp['accountId']
+          puts("AWS Unique ID loaded: #{@aws_unique_id}")
+        else
+          puts('Failed to retrieve AWS unique ID.')
+        end
+      }
+    end
+    puts('initialize end')
   end
 
   #Send the given metrics to SignalFx synchronously.
@@ -99,14 +115,17 @@ class SignalFxClient
   #    dimensions (dict): a map of event dimensions.
   #    properties (dict): a map of extra properties on that event.
   def send_event(event_type, dimensions: {}, properties: {})
-
-    #TODO: Add AWS Unique ID to dimensions array
-    #TODO: Add pre-defined dimensions to dimensions array
     data = {
         eventType: event_type,
         dimensions: dimensions,
         properties: properties
     }
+
+    if @aws_unique_id
+      data[:dimensions][Config::AWS_UNIQUE_ID_DIMENSION_NAME] = @aws_unique_id
+    end
+
+    puts(data)
 
     post(data.to_json, @api_endpoint, API_ENDPOINT_SUFFIX, Config::JSON_HEADER_CONTENT_TYPE)
   end
@@ -127,43 +146,74 @@ class SignalFxClient
 
   private
 
-  def post(data_to_send, url, suffix, content_type = nil)
-    uri = URI.parse(url + '/' + suffix)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    http.read_timeout = @timeout
-
-    http_user_agents = ''
-    if @user_agents != nil && @user_agents.length > 0
-      http_user_agents = ', ' + @user_agents.join(', ')
-    end
-
-    headers = {HEADER_CONTENT_TYPE => content_type != nil ? content_type : header_content_type,
-               HEADER_API_TOKEN_KEY => @api_token,
-               HEADER_USER_AGENT_KEY => Version::NAME + '/' + Version::VERSION + http_user_agents}
-    request = Net::HTTP::Post.new(uri.request_uri, headers)
-    request.body = data_to_send
-
+  def post(data_to_send, url, suffix, content_type = nil, &block)
     begin
-      response = http.request(request)
-      if response.code != "200"
-        puts "Failed to sent datapoint. Response code: #{response.code}"
+      http_user_agents = ''
+      if @user_agents != nil && @user_agents.length > 0
+        http_user_agents = ', ' + @user_agents.join(', ')
       end
-    rescue Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
-        Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
-      puts "Failed to sent datapoint. Error: #{e}"
-    rescue Exception => e
-      puts "BAD STUFF #{e} #{data_to_send}"
-    end
 
+      headers = {HEADER_CONTENT_TYPE => content_type != nil ? content_type : header_content_type,
+                 HEADER_API_TOKEN_KEY => @api_token,
+                 HEADER_USER_AGENT_KEY => Version::NAME + '/' + Version::VERSION + http_user_agents}
+
+      RestClient::Request.execute(
+          method: :post,
+          url: url + '/' + suffix,
+          headers: headers,
+          payload: data_to_send,
+          verify_ssl: OpenSSL::SSL::VERIFY_NONE,
+          timeout: @timeout) { |response|
+        case response.code
+          when 200
+            if block
+              block.call(response)
+            end
+          else
+            puts "Failed to send datapoints. Response code: #{response.code}"
+            if block
+              block.call(nil)
+            end
+        end
+      }
+    rescue Exception => e
+      puts "Failed to send datapoints. Error: #{e}"
+      if block
+        block.call(nil)
+      end
+    end
+  end
+
+  def retrieve_aws_unique_id(&block)
+    begin
+      RestClient::Request.execute(method: :get, url: Config::AWS_UNIQUE_ID_URL,
+                                  timeout: 1) { |response|
+        case response.code
+          when 200
+            return block.call(response)
+          else
+            puts "Failed to retrieve AWS unique ID. Response code: #{response.code}"
+            return block.call(nil)
+        end
+      }
+    rescue Exception => e
+      puts "Failed to retrieve AWS unique ID. Error: #{e}"
+      block.call(nil)
+    end
   end
 
   def process_datapoint(metric_type, data_points)
     if data_points != nil && data_points.kind_of?(Array)
-      #TODO: Add AWS Unique ID to each datapoint
-      #TODO: Add pre-defined dimensions to each datapoint
-      data_points.each { |datapoint| add_to_queue(metric_type, datapoint) }
+      data_points.each { |datapoint|
+        if @aws_unique_id
+          if datapoint[:dimensions] == nil
+            datapoint[:dimensions] = []
+          end
+          datapoint[:dimensions].push({:key => Config::AWS_UNIQUE_ID_DIMENSION_NAME, :value => @aws_unique_id})
+        end
+        puts(datapoint)
+        add_to_queue(metric_type, datapoint)
+      }
     end
   end
 end

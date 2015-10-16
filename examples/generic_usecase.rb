@@ -14,16 +14,16 @@ end
 
 
 #create client instance with SignalFx API access token
-client = SignalFx.new token
+client = SignalFx.new token, enable_aws_unique_id: true, timeout: 3000
 
-DATAPOINTS_NUMBER = 1000
-
+puts 'SignalFx metrics reporting demo:'
 #run loop to send datapoints to SignalFx
 counter = 0
-while counter < DATAPOINTS_NUMBER do
-  puts "Send dataponts ##{counter}"
-  gauges = [{:metric => 'test.cpu', :value => counter % 10}]
-  counters = [{:metric => 'cpu_cnt', :value => counter % 2}]
+while true do
+  puts "Send datapoints ##{counter}"
+  timestamp = (Time.now.to_i * 1000).to_i
+  gauges = [{:metric => 'test.cpu', :value => counter % 10, :timestamp => timestamp}]
+  counters = [{:metric => 'cpu_cnt', :value => counter % 2, :timestamp => timestamp}]
 
   client.send(gauges: gauges, counters: counters)
 
