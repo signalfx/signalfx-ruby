@@ -1,4 +1,0 @@
-1. To add bool flag "AWS integration" (predefined dimension AWSUniqueId)
-AWS Unique ID format: [AWS Instance ID]_[region]_[account Id]
-
-2. Implement function to define set of dimensions for every datapoint and event
