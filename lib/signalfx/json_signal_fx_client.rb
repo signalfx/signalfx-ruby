@@ -13,7 +13,15 @@ class JsonSignalFx < SignalFxClient
   end
 
   def add_to_queue(metric_type, datapoint)
-    @queue.push({metric_type => datapoint})
+    #set datapoint dimensions
+    dimensions = {}
+    if datapoint[:dimensions] != nil
+      datapoint[:dimensions].each {
+          |dimension| dimensions[dimension[:key]] = dimension[:value]
+      }
+    end
+    datapoint[:dimensions] = dimensions
+    get_queue << {metric_type => datapoint}
   end
 
   def batch_data(data_point_list)

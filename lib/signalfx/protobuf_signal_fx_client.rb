@@ -51,7 +51,7 @@ class ProtoBufSignalFx < SignalFxClient
     protobuf_datapoint.dimensions = dimensions
 
     # add object to queue
-    @queue.push(protobuf_datapoint)
+    get_queue. << protobuf_datapoint
   end
 
 
