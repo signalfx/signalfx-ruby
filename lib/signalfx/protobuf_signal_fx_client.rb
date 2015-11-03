@@ -1,9 +1,9 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
 require 'thread'
-require "signalfx/conf"
-require "signalfx/signal_fx_client"
-require "proto/signal_fx_protocol_buffers.pb"
+require_relative './conf'
+require_relative './signal_fx_client'
+require_relative '../proto/signal_fx_protocol_buffers.pb'
 
 class ProtoBufSignalFx < SignalFxClient
 

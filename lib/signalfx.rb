@@ -1,8 +1,8 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-require 'signalfx/conf'
-require 'signalfx/protobuf_signal_fx_client'
-require 'signalfx/json_signal_fx_client'
+require_relative 'signalfx/conf'
+require_relative 'signalfx/protobuf_signal_fx_client'
+require_relative 'signalfx/json_signal_fx_client'
 
 module SignalFx
 
@@ -25,7 +25,7 @@ module SignalFx
       api_endpoint: Config::DEFAULT_API_ENDPOINT, timeout: Config::DEFAULT_TIMEOUT,
       batch_size: Config::DEFAULT_BATCH_SIZE, user_agents: [])
     begin
-      require 'proto/signal_fx_protocol_buffers.pb'
+      require_relative './proto/signal_fx_protocol_buffers.pb'
       ProtoBufSignalFx.new(api_token, enable_aws_unique_id: enable_aws_unique_id, ingest_endpoint: ingest_endpoint,
                            api_endpoint: api_endpoint, timeout: timeout,
                            batch_size: batch_size, user_agents: user_agents)

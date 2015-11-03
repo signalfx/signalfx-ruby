@@ -1,8 +1,8 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-require "signalfx/signal_fx_client"
-require "signalfx/conf"
-require "json"
+require_relative './signal_fx_client'
+require_relative './conf'
+require 'json'
 
 class JsonSignalFx < SignalFxClient
 

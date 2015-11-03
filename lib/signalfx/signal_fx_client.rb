@@ -1,7 +1,7 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-require 'signalfx/version'
-require 'signalfx/conf'
+require_relative './version'
+require_relative './conf'
 
 require 'net/http'
 require 'uri'
