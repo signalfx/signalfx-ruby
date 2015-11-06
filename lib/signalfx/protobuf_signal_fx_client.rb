@@ -1,9 +1,9 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
 require 'thread'
-require "signalfx/conf"
-require "signalfx/signal_fx_client"
-require "proto/signal_fx_protocol_buffers.pb"
+require_relative './conf'
+require_relative './signal_fx_client'
+require_relative '../proto/signal_fx_protocol_buffers.pb'
 
 class ProtoBufSignalFx < SignalFxClient
 
@@ -51,7 +51,7 @@ class ProtoBufSignalFx < SignalFxClient
     protobuf_datapoint.dimensions = dimensions
 
     # add object to queue
-    @queue.push(protobuf_datapoint)
+    get_queue. << protobuf_datapoint
   end
 
 

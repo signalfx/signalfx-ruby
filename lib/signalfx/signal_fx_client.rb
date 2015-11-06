@@ -1,7 +1,7 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-require 'signalfx/version'
-require 'signalfx/conf'
+require_relative './version'
+require_relative './conf'
 
 require 'net/http'
 require 'uri'
@@ -60,7 +60,7 @@ class SignalFxClient
 
     data_points_list = []
     while @queue.length > 0 && data_points_list.length < @batch_size
-      data_points_list << @queue.pop
+      data_points_list << @queue.shift
     end
 
     data_to_send = batch_data(data_points_list)
@@ -90,7 +90,7 @@ class SignalFxClient
 
     data_points_list = []
     while @queue.length > 0 && data_points_list.length < @batch_size
-      data_points_list << @queue.pop
+      data_points_list << @queue.shift
     end
 
     data_to_send = batch_data(data_points_list)
@@ -100,7 +100,10 @@ class SignalFxClient
     Thread.abort_on_exception = true
     Thread.start {
       begin
-        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
+
+        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX){
+          @async_running = false
+        }
       ensure
         @async_running = false
       end
@@ -131,6 +134,10 @@ class SignalFxClient
   end
 
   protected
+
+  def get_queue
+    @queue
+  end
 
   def header_content_type
     raise 'Subclasses should implement this!'
@@ -209,9 +216,9 @@ class SignalFxClient
           if datapoint[:dimensions] == nil
             datapoint[:dimensions] = []
           end
-          datapoint[:dimensions].push({:key => Config::AWS_UNIQUE_ID_DIMENSION_NAME, :value => @aws_unique_id})
+          datapoint[:dimensions] << {:key => Config::AWS_UNIQUE_ID_DIMENSION_NAME, :value => @aws_unique_id}
         end
-        puts(datapoint)
+
         add_to_queue(metric_type, datapoint)
       }
     end

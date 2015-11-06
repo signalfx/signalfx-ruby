@@ -14,7 +14,7 @@ end
 
 
 #create client instance with SignalFx API access token
-client = SignalFx.new token, enable_aws_unique_id: true, timeout: 3000
+client = SignalFx.new token, enable_aws_unique_id: false, timeout: 3000
 
 puts 'SignalFx metrics reporting demo:'
 #run loop to send datapoints to SignalFx

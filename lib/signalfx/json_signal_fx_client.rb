@@ -1,8 +1,8 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-require "signalfx/signal_fx_client"
-require "signalfx/conf"
-require "json"
+require_relative './signal_fx_client'
+require_relative './conf'
+require 'json'
 
 class JsonSignalFx < SignalFxClient
 
@@ -13,7 +13,15 @@ class JsonSignalFx < SignalFxClient
   end
 
   def add_to_queue(metric_type, datapoint)
-    @queue.push({metric_type => datapoint})
+    #set datapoint dimensions
+    dimensions = {}
+    if datapoint[:dimensions] != nil
+      datapoint[:dimensions].each {
+          |dimension| dimensions[dimension[:key]] = dimension[:value]
+      }
+    end
+    datapoint[:dimensions] = dimensions
+    get_queue << {metric_type => datapoint}
   end
 
   def batch_data(data_point_list)
