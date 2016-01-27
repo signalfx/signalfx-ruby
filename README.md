@@ -28,10 +28,10 @@ To use this library, you need a SignalFx API access token, which can be obtained
 The default constructor `SignalFx` uses Protobuf to send data to SignalFx. If it cannot send Protobuf, it falls back to sending JSON.
 
 ```ruby
-require('signalfx');
+require('signalfx')
 
 // Create client
-client = SignalFx.new 'MY_SIGNALFX_TOKEN';
+client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 ```
 
 Optional constructor parameters:
@@ -51,9 +51,9 @@ Optional constructor parameters:
 This example shows how to report metrics to SignalFx, as gauges, counters, or cumulative counters. 
 
 ```ruby
-require('signalfx');
+require('signalfx')
 
-client = SignalFx.new 'MY_SIGNALFX_TOKEN';
+client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
 client.send(
            cumulative_counters:[
@@ -73,7 +73,7 @@ client.send(
                 :value => 42, 
                 :timestamp => 1442960607000},
              ...
-           ]);
+           ])
 ```
 The `timestamp` must be a millisecond precision timestamp; the number of milliseconds elapsed since Epoch. The `timestamp` field is optional, but strongly recommended. If not specified, it will be set by SignalFx's ingest servers automatically; in this situation, the timestamp of your datapoints will not accurately represent the time of their measurement (network latency, batching, etc. will all impact when those datapoints actually make it to SignalFx).
 
@@ -83,9 +83,9 @@ Reporting dimensions for the data is also optional, and can be accomplished by s
 
 
 ```ruby
-require('signalfx');
+require('signalfx')
 
-client = SignalFx.new 'MY_SIGNALFX_TOKEN';
+client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
 client.send(
           cumulative_counters:[
@@ -105,7 +105,7 @@ client.send(
                 :value=> 42, 
                 :dimensions=> [{:key => 'host', :value => 'server1'}]},
             ...
-          ]);
+          ])
 ```
 See `examples/generic_usecase.py` for a complete code example for Reporting data.
 
@@ -117,9 +117,9 @@ can be supplied as well.
 
 
 ```ruby
-require('signalfx');
+require('signalfx')
 
-client = SignalFx.new 'MY_SIGNALFX_TOKEN';
+client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
 client.send_event(
           '[event_type]',
