@@ -113,8 +113,10 @@ See `examples/generic_usecase.py` for a complete code example for Reporting data
 
 Events can be sent to SignalFx via the `send_event` function. The
 event type must be specified, and dimensions and extra event properties
-can be supplied as well.
-
+can be supplied as well. Also please specify event category: for that get
+option from dictionary `EVENT_CATEGORIES`. Different categories of events are supported.
+Available categories of events are `USER_DEFINED`, `ALERT`, `AUDIT`, `JOB`, 
+`COLLECTD`, `SERVICE_DISCOVERY`, `EXCEPTION`. 
 
 ```ruby
 require('signalfx')
@@ -123,13 +125,15 @@ client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
 client.send_event(
           '[event_type]',
+          '[event_category]',
           {
               host: 'myhost',
               service: 'myservice',
               instance: 'myinstance'
           },
           properties={
-              version: 'event_version'})
+              version: 'event_version'},
+          timestamp)
 ```
 
 See `examples/generic_usecase.py` for a complete code example for Reporting data.
