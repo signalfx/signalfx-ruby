@@ -1,7 +1,7 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
 require 'thread'
-require_relative './conf'
+require_relative './rbconf'
 require_relative './signal_fx_client'
 require_relative '../proto/signal_fx_protocol_buffers.pb'
 
@@ -10,7 +10,7 @@ class ProtoBufSignalFx < SignalFxClient
   protected
 
   def header_content_type
-    Config::PROTOBUF_HEADER_CONTENT_TYPE
+    RbConfig::PROTOBUF_HEADER_CONTENT_TYPE
   end
 
 

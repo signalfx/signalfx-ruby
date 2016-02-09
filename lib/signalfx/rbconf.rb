@@ -1,6 +1,6 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
-module Config
+module RbConfig
 # Default Parameters
   DEFAULT_INGEST_ENDPOINT = 'https://ingest.signalfx.com'
   DEFAULT_BATCH_SIZE = 300 # Will wait for this many requests before posting

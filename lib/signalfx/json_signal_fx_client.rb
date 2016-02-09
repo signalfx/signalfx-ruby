@@ -1,7 +1,7 @@
 # Copyright (C) 2015 SignalFx, Inc. All rights reserved.
 
 require_relative './signal_fx_client'
-require_relative './conf'
+require_relative './rbconf'
 require 'json'
 
 class JsonSignalFx < SignalFxClient
@@ -9,7 +9,7 @@ class JsonSignalFx < SignalFxClient
   protected
 
   def header_content_type
-    Config::JSON_HEADER_CONTENT_TYPE
+    RbConfig::JSON_HEADER_CONTENT_TYPE
   end
 
   def add_to_queue(metric_type, datapoint)
