@@ -43,7 +43,7 @@ describe 'SignalFx(Fabric method)' do
 
   it 'should be created JsonSignalFx client when Protobuf initialize failed' do
     #Mock ProtoBufSignalFx to thrown Excebtion
-    ProtoBufSignalFx.stub(:new).and_raise(Exception)
+    expect(ProtoBufSignalFx).to receive(:new).and_raise(Exception)
 
     @subject = SignalFx.new TOKEN
 
