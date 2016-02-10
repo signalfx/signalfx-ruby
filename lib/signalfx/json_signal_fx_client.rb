@@ -37,4 +37,10 @@ class JsonSignalFx < SignalFxClient
 
     data.to_json
   end
+
+  def build_event(event)
+    event_list = []
+    event_list << event
+    event_list.to_json
+  end
 end

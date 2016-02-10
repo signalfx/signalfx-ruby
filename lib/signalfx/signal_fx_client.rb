@@ -13,15 +13,26 @@ class SignalFxClient
   HEADER_USER_AGENT_KEY = 'User-Agent'
   HEADER_CONTENT_TYPE = 'Content-Type'
   INGEST_ENDPOINT_SUFFIX = 'v2/datapoint'
-  API_ENDPOINT_SUFFIX = 'v1/event'
+  EVENT_ENDPOINT_SUFFIX = 'v2/event'
+
+  EVENT_CATEGORIES = {
+      USER_DEFINED: 'USER_DEFINED',
+      ALERT: 'ALERT',
+      AUDIT: 'AUDIT',
+      JOB: 'JOB',
+      COLLECTD: 'COLLECTD',
+      SERVICE_DISCOVERY: 'SERVICE_DISCOVERY',
+      EXCEPTION: 'EXCEPTION'
+  }
+
+  $event_categories = EVENT_CATEGORIES
 
   def initialize(api_token, enable_aws_unique_id: false, ingest_endpoint: Config::DEFAULT_INGEST_ENDPOINT,
-                 api_endpoint: Config::DEFAULT_API_ENDPOINT, timeout: Config::DEFAULT_TIMEOUT,
+                 timeout: Config::DEFAULT_TIMEOUT,
                  batch_size: Config::DEFAULT_BATCH_SIZE, user_agents: [])
 
     @api_token = api_token
     @ingest_endpoint = ingest_endpoint
-    @api_endpoint = api_endpoint
     @timeout = timeout
     @batch_size = batch_size
     @user_agents = user_agents
@@ -101,7 +112,7 @@ class SignalFxClient
     Thread.start {
       begin
 
-        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX){
+        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX) {
           @async_running = false
         }
       ensure
@@ -115,22 +126,38 @@ class SignalFxClient
   #
   #Args:
   #    event_type (string): the event type (name of the event time series).
+  #    event_category (string): the category of event. Choose one from EVENT_CATEGORIES list
   #    dimensions (dict): a map of event dimensions.
   #    properties (dict): a map of extra properties on that event.
-  def send_event(event_type, dimensions: {}, properties: {})
+  #    timestamp (int64): a timestamp, by default is current time
+  def send_event(event_type, event_category: EVENT_CATEGORIES[:USER_DEFINED],
+                 dimensions: {}, properties: {}, timestamp: (Time.now.to_i * 1000).to_i)
+    if event_type.blank?
+      raise 'Type of event should not be empty!'
+    end
+
+    event_cat = event_category
+    if event_category.blank?
+      event_cat = EVENT_CATEGORIES[:USER_DEFINED]
+    end
+
+    if !event_cat.blank? and !EVENT_CATEGORIES.has_value?(event_cat)
+      raise 'Unsupported event category: ' + event_cat
+    end
+
     data = {
+        category: event_cat,
         eventType: event_type,
         dimensions: dimensions,
-        properties: properties
+        properties: properties,
+        timestamp: timestamp
     }
 
     if @aws_unique_id
       data[:dimensions][Config::AWS_UNIQUE_ID_DIMENSION_NAME] = @aws_unique_id
     end
 
-    puts(data)
-
-    post(data.to_json, @api_endpoint, API_ENDPOINT_SUFFIX, Config::JSON_HEADER_CONTENT_TYPE)
+    post(build_event(data), @ingest_endpoint, EVENT_ENDPOINT_SUFFIX)
   end
 
   protected
@@ -151,16 +178,20 @@ class SignalFxClient
     raise 'Subclasses should implement this!'
   end
 
+  def build_event(event)
+    raise 'Subclasses should implement this!'
+  end
+
   private
 
-  def post(data_to_send, url, suffix, content_type = nil, &block)
+  def post(data_to_send, url, suffix, &block)
     begin
       http_user_agents = ''
       if @user_agents != nil && @user_agents.length > 0
         http_user_agents = ', ' + @user_agents.join(', ')
       end
 
-      headers = {HEADER_CONTENT_TYPE => content_type != nil ? content_type : header_content_type,
+      headers = {HEADER_CONTENT_TYPE => header_content_type,
                  HEADER_API_TOKEN_KEY => @api_token,
                  HEADER_USER_AGENT_KEY => Version::NAME + '/' + Version::VERSION + http_user_agents}
 

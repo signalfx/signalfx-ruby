@@ -36,8 +36,8 @@ while true do
          instance: 'myinstance'}
     properties = {version: version}
 
-
-    client.send_event(event_type, dimensions: dimensions, properties: properties)
+    event_category = SignalFxClient::EVENT_CATEGORIES[:ALERT]
+    client.send_event(event_type, event_category: event_category, dimensions: dimensions, properties: properties)
   end
 
   counter +=1

@@ -60,4 +60,55 @@ class ProtoBufSignalFx < SignalFxClient
     data_point_list.each { |datapoint| dpum.datapoints << datapoint }
     dpum.to_s
   end
+
+  def build_event(event)
+    protobuf_event = Com::Signalfx::Metrics::Protobuf::Event.new
+    if event[:eventType]
+      protobuf_event.eventType = event[:eventType]
+    end
+
+    if event[:category]
+      protobuf_event.category = Com::Signalfx::Metrics::Protobuf::EventCategory.const_get(event[:category].upcase)
+    end
+
+    if event[:timestamp]
+      protobuf_event.timestamp = event[:timestamp];
+    end
+
+    #set datapoint dimensions
+    dimensions = Array.new
+    if event[:dimensions] != nil
+      event[:dimensions].each {
+          |key, value| dimensions.push(
+            Com::Signalfx::Metrics::Protobuf::Dimension.new :key => key, :value => value)
+      }
+    end
+    protobuf_event.dimensions = dimensions
+
+    # assign value type
+    protobuf_event.properties = []
+    event[:properties].each { |prop_key, prop_value |
+      property = Com::Signalfx::Metrics::Protobuf::Property.new
+      property.key = prop_key
+      if prop_value.kind_of?(String)
+        property.value = Com::Signalfx::Metrics::Protobuf::PropertyValue.new :strValue => prop_value
+      else
+        if prop_value.kind_of?(Float)
+          property.value = Com::Signalfx::Metrics::Protobuf::PropertyValue.new :doubleValue => prop_value
+        else
+          if prop_value.kind_of?(Fixnum)
+            property.value = Com::Signalfx::Metrics::Protobuf::PropertyValue.new :intValue => prop_value
+          else
+            throw TypeError('Invalid Value ' + prop_value);
+          end
+        end
+      end
+      protobuf_event.properties << property
+    }
+
+    event_msg = Com::Signalfx::Metrics::Protobuf::EventUploadMessage.new
+    event_msg[:events] = Array.new
+    event_msg[:events] << protobuf_event
+    event_msg.to_s
+  end
 end
