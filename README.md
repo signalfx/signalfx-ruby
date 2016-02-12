@@ -107,7 +107,7 @@ client.send(
             ...
           ])
 ```
-See `examples/generic_usecase.py` for a complete code example for Reporting data.
+See `examples/generic_usecase.rb` for a complete code example for Reporting data.
 
 ### Sending events
 
@@ -136,7 +136,7 @@ client.send_event(
           timestamp)
 ```
 
-See `examples/generic_usecase.py` for a complete code example for Reporting data.
+See `examples/generic_usecase.rb` for a complete code example for Reporting data.
 
 ## License
 
