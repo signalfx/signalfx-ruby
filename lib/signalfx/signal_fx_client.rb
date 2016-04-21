@@ -53,7 +53,6 @@ class SignalFxClient
         end
       }
     end
-    puts('initialize end')
   end
 
   #Send the given metrics to SignalFx synchronously.
