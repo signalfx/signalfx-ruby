@@ -34,5 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.3"
   spec.add_development_dependency "webmock", "~> 2.1"
   spec.add_dependency "protobuf", "~> 3.5.1", ">= 3.5.1"
-  spec.add_dependency "rest-client", "~> 1.8"
+  spec.add_dependency "rest-client", "~> 2.0"
 end
