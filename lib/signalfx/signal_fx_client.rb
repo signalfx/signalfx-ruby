@@ -199,7 +199,7 @@ class SignalFxClient
           url: url + '/' + suffix,
           headers: headers,
           payload: data_to_send,
-          verify_ssl: OpenSSL::SSL::VERIFY_NONE,
+          verify_ssl: OpenSSL::SSL::VERIFY_PEER,
           timeout: @timeout) { |response|
         case response.code
           when 200
