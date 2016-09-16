@@ -7,7 +7,6 @@ describe 'SignalFxClient(a.k.a abstract class)' do
     @subject = SignalFxClient.new TOKEN
   end
 
-
   it 'exception should be thrown when send data' do
     gauges = [{:metric => 'test.cpu', :value => 1}]
     counters = [{:metric => 'cpu_cnt', :value => 2}]
@@ -353,7 +352,5 @@ describe 'SignalFx(General)' do
     expect {
       @subject.send_event('deployment', event_category: 'TEST')
     }.to raise_error(RuntimeError)
-
   end
-
 end

@@ -1,4 +1,4 @@
-# Copyright (C) 2015 SignalFx, Inc. All rights reserved.
+# Copyright (C) 2015-2016 SignalFx, Inc. All rights reserved.
 
 module Version
   VERSION = '1.0.0'

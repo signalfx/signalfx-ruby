@@ -1,4 +1,4 @@
-# Copyright (C) 2015 SignalFx, Inc. All rights reserved.
+# Copyright (C) 2015-2016 SignalFx, Inc. All rights reserved.
 
 require_relative './version'
 require_relative './conf'
@@ -110,7 +110,6 @@ class SignalFxClient
     Thread.abort_on_exception = true
     Thread.start {
       begin
-
         post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX) {
           @async_running = false
         }
