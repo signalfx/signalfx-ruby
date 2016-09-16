@@ -1,4 +1,4 @@
-# Copyright (C) 2015 SignalFx, Inc. All rights reserved.
+# Copyright (C) 2015-2016 SignalFx, Inc. All rights reserved.
 
 require 'thread'
 require_relative './conf'

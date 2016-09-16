@@ -1,11 +1,10 @@
-# Copyright (C) 2015 SignalFx, Inc. All rights reserved.
+# Copyright (C) 2015-2016 SignalFx, Inc. All rights reserved.
 
 require_relative 'signalfx/conf'
 require_relative 'signalfx/protobuf_signal_fx_client'
 require_relative 'signalfx/json_signal_fx_client'
 
 module SignalFx
-
   # SignalFx API client.
   # This class presents a programmatic interface to SignalFx's metadata and
   # ingest APIs. At the time being, only ingest is supported; more will come
@@ -37,7 +36,5 @@ module SignalFx
                        timeout: timeout,
                        batch_size: batch_size, user_agents: user_agents)
     end
-
-
   end
 end

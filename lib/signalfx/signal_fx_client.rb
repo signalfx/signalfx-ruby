@@ -1,4 +1,4 @@
-# Copyright (C) 2015 SignalFx, Inc. All rights reserved.
+# Copyright (C) 2015-2016 SignalFx, Inc. All rights reserved.
 
 require_relative './version'
 require_relative './conf'
@@ -110,7 +110,6 @@ class SignalFxClient
     Thread.abort_on_exception = true
     Thread.start {
       begin
-
         post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX) {
           @async_running = false
         }
@@ -199,7 +198,7 @@ class SignalFxClient
           url: url + '/' + suffix,
           headers: headers,
           payload: data_to_send,
-          verify_ssl: OpenSSL::SSL::VERIFY_NONE,
+          verify_ssl: OpenSSL::SSL::VERIFY_PEER,
           timeout: @timeout) { |response|
         case response.code
           when 200

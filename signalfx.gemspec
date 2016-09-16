@@ -27,10 +27,12 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.required_ruby_version = '>= 2.2.0'
+
   spec.add_development_dependency "bundler", "~> 1.10"
   spec.add_development_dependency "rake", "~> 10.0"
-  spec.add_development_dependency "rspec"
-  spec.add_development_dependency "webmock", "~> 1.21"
+  spec.add_development_dependency "rspec", "~> 3.3"
+  spec.add_development_dependency "webmock", "~> 2.1"
   spec.add_dependency "protobuf", "~> 3.5.1", ">= 3.5.1"
   spec.add_dependency "rest-client", "~> 1.8"
 end
