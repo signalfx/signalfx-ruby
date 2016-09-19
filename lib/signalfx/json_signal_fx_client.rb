@@ -9,7 +9,7 @@ class JsonSignalFx < SignalFxClient
   protected
 
   def header_content_type
-    Config::JSON_HEADER_CONTENT_TYPE
+    RbConfig::JSON_HEADER_CONTENT_TYPE
   end
 
   def add_to_queue(metric_type, datapoint)

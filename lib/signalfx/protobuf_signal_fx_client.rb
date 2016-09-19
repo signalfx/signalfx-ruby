@@ -10,7 +10,7 @@ class ProtoBufSignalFx < SignalFxClient
   protected
 
   def header_content_type
-    Config::PROTOBUF_HEADER_CONTENT_TYPE
+    RbConfig::PROTOBUF_HEADER_CONTENT_TYPE
   end
 
 

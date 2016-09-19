@@ -27,9 +27,12 @@ class SignalFxClient
 
   $event_categories = EVENT_CATEGORIES
 
-  def initialize(api_token, enable_aws_unique_id: false, ingest_endpoint: Config::DEFAULT_INGEST_ENDPOINT,
-                 timeout: Config::DEFAULT_TIMEOUT,
-                 batch_size: Config::DEFAULT_BATCH_SIZE, user_agents: [])
+  def initialize(api_token,
+                 enable_aws_unique_id: false,
+                 ingest_endpoint: RbConfig::DEFAULT_INGEST_ENDPOINT,
+                 timeout: RbConfig::DEFAULT_TIMEOUT,
+                 batch_size: RbConfig::DEFAULT_BATCH_SIZE,
+                 user_agents: [])
 
     @api_token = api_token
     @ingest_endpoint = ingest_endpoint
@@ -152,7 +155,7 @@ class SignalFxClient
     }
 
     if @aws_unique_id
-      data[:dimensions][Config::AWS_UNIQUE_ID_DIMENSION_NAME] = @aws_unique_id
+      data[:dimensions][RbConfig::AWS_UNIQUE_ID_DIMENSION_NAME] = @aws_unique_id
     end
 
     post(build_event(data), @ingest_endpoint, EVENT_ENDPOINT_SUFFIX)
@@ -222,7 +225,8 @@ class SignalFxClient
 
   def retrieve_aws_unique_id(&block)
     begin
-      RestClient::Request.execute(method: :get, url: Config::AWS_UNIQUE_ID_URL,
+      RestClient::Request.execute(method: :get,
+                                  url: RbConfig::AWS_UNIQUE_ID_URL,
                                   timeout: 1) { |response|
         case response.code
           when 200
@@ -245,7 +249,7 @@ class SignalFxClient
           if datapoint[:dimensions] == nil
             datapoint[:dimensions] = []
           end
-          datapoint[:dimensions] << {:key => Config::AWS_UNIQUE_ID_DIMENSION_NAME, :value => @aws_unique_id}
+          datapoint[:dimensions] << {:key => RbConfig::AWS_UNIQUE_ID_DIMENSION_NAME, :value => @aws_unique_id}
         end
 
         add_to_queue(metric_type, datapoint)
