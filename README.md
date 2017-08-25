@@ -155,6 +155,44 @@ client.send_event(
 See `examples/generic_usecase.rb` for a complete code example for
 sending events.
 
+### SignalFlow
+
+You can run SignalFlow computations as well.  This library supports all of the
+functionality described in our [API docs for
+SignalFlow](https://developers.signalfx.com/reference#signalflowconnect). Right
+now, the only supported transport mechanism is WebSockets.
+
+To create a new SignalFlow client instance from an existing SignalFx client:
+
+```ruby
+sf = client.signalflow()
+```
+
+To execute and attach to a SignalFlow computation, do the
+following:
+
+```ruby
+sf.execute("data('cpu.utilization').mean(by='host').publish()").each_message do |msg, detach|
+  case msg[:type]
+  when "data"
+    process_datapoints(msg.timestamp, msg.data)
+  end
+
+  if done_processing
+    detach.call
+  end
+end
+```
+
+For the full API see [the RubyDocs for the SignalFlow
+client](http://www.rubydoc.info/github/signalfx/signalfx-ruby/master/SignalFlowClient/)
+(the `sf` var above).
+
+The messages passed into the `each_message*` blocks will be decoded forms of
+what is described in [our API reference for
+SignalFlow](https://developers.signalfx.com/v2/reference#information-messages-specification).
+Hash keys will be symbols instead of strings.
+
 ## License
 
 Apache Software License v2. Copyright © 2015-2016
