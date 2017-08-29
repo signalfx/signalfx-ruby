@@ -52,7 +52,6 @@ module BinaryMessageParser
     {
       :type => "data",
       :timestampMs => timestamp,
-      :timestamp => Time.at(timestamp/1000),
       :data => tuple_hashes,
     }
   end

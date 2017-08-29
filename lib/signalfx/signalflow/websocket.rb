@@ -286,7 +286,7 @@ class SignalFlowWebsocketTransport
 
   def add_parsed_timestamp!(msg)
     if msg.has_key?(:timestampMs)
-      msg[:timestamp] = Time.at(msg[:timestampMs]/1000)
+      msg[:timestamp] = Time.at(msg[:timestampMs] / 1000.0)
     end
     msg
   end
