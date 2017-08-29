@@ -24,13 +24,13 @@ module BinaryMessageParser
 
     message = is_json ?
                 JSON.parse(payload, {:symbolize_names => true}) :
-                parse_binary_payload(payload)
+                parse_data_payload(payload)
 
     message.merge({:channel => channel})
   end
   module_function :parse
 
-  def parse_binary_payload(payload)
+  def parse_data_payload(payload)
     # See https://developers.signalfx.com/v2/reference#section-binary-encoding-used-for-the-websocket
     timestamp, element_count, tuples_raw = payload.unpack("Q>L>a*")
     tuple_hashes = (0..element_count-1).map do |i|
@@ -57,5 +57,5 @@ module BinaryMessageParser
       :data => tuple_hashes,
     }
   end
-  module_function :parse_binary_payload
+  module_function :parse_data_payload
 end
