@@ -35,10 +35,10 @@ class Channel
   def each_message_async(&block)
     raise 'each_message_async() requires block' unless block
 
-    replay_existing_messages(&block)
-    return if @detached
-
     @cb_lock.synchronize do
+      replay_existing_messages(&block)
+      return if @detached
+
       @cbs << block
     end
     return
@@ -57,11 +57,11 @@ class Channel
     wait_lock = Mutex.new
     cv = ConditionVariable.new
 
-    replay_existing_messages(&block)
-
-    return if @detached
-
     @cb_lock.synchronize do
+      replay_existing_messages(&block)
+
+      return if @detached
+
       @cbs << ->(msg, detach) do
         send_message_to_block(msg, &block)
         if @detached
@@ -99,11 +99,13 @@ class Channel
 
   def inject_message(msg)
     @lock.synchronize do
-      return if @detached
-      @messages << msg
-      @cbs.each {|cb| send_message_to_block(msg, &cb)}
-      if msg[:event] == "END_OF_CHANNEL" || msg[:event] == "CONNECTION_CLOSED" || msg[:event] == "CHANNEL_ABORT"
-        detach(false)
+      @cb_lock.synchronize do
+        return if @detached
+        @messages << msg
+        @cbs.each {|cb| send_message_to_block(msg, &cb)}
+        if msg[:event] == "END_OF_CHANNEL" || msg[:event] == "CONNECTION_CLOSED" || msg[:event] == "CHANNEL_ABORT"
+          detach(false)
+        end
       end
     end
   end
