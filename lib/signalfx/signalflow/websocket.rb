@@ -1,3 +1,5 @@
+# Copyright (C) 2017 SignalFx, Inc. All rights reserved.
+
 require 'json'
 require 'thread'
 require 'websocket-client-simple'

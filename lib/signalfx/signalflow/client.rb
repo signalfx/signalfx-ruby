@@ -1,3 +1,5 @@
+# Copyright (C) 2017 SignalFx, Inc. All rights reserved.
+
 require 'thread'
 
 require_relative "./websocket"

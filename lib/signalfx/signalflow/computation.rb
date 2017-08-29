@@ -1,3 +1,5 @@
+# Copyright (C) 2017 SignalFx, Inc. All rights reserved.
+
 # Represents a SignalFlow computation.  A computation can have a channel
 # associated with it, but not necessarily (it could have been detached while
 # the computation is still running).  New instances should only be created by

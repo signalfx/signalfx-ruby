@@ -1,3 +1,5 @@
+# Copyright (C) 2017 SignalFx, Inc. All rights reserved.
+
 # Channel represents a medium through which SignalFlow messages pass.
 # The main method for it is {#each_message}, which is how you get messages from
 # the channel.
