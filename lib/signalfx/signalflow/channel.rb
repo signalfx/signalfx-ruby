@@ -1,5 +1,7 @@
 # Copyright (C) 2017 SignalFx, Inc. All rights reserved.
 
+require_relative './queue'
+
 class ChannelTimeout < Exception
 end
 
@@ -21,7 +23,7 @@ class Channel
     @detached = false
     @name = name
     @detach_from_transport = detach_cb
-    @messages = Queue.new
+    @messages = QueueWithTimeout.new
   end
 
   # Waits for and returns the next message in the channel.
@@ -37,24 +39,11 @@ class Channel
     raise "Channel #{@name} is detached" if @detached
 
     msg = nil
-    # Unfortunate Ruby queues don't support waiting with a timeout so hack it
-    # up ourselves so we don't end up blocking forever by accident.
-    if timeout_seconds.nil?
-      msg = @messages.pop
-    else
-      start_time = Time.now
-      while
-        begin
-          msg = @messages.pop(true)
-          break
-        rescue ThreadError
-          if (Time.now - start_time) > timeout_seconds
-            raise ChannelTimeout.new(
-              "Did not receive a message on channel #{@name} within #{timeout_seconds} seconds")
-          end
-          sleep 0.1
-        end
-      end
+    begin
+      msg = @messages.pop_with_timeout(timeout_seconds)
+    rescue ThreadError
+      raise ChannelTimeout.new(
+        "Did not receive a message on channel #{@name} within #{timeout_seconds} seconds")
     end
 
     if msg[:event] == "END_OF_CHANNEL" || msg[:event] == "CONNECTION_CLOSED" || msg[:event] == "CHANNEL_ABORT"
