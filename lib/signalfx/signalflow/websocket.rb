@@ -10,8 +10,13 @@ require_relative './channel'
 require_relative './computation'
 
 
+# A WebSocket transport for SignalFlow.  This should not be used directly by
+# end-users.
 class SignalFlowWebsocketTransport
   DETACHED = "DETACHED"
+
+  # A lower bound on the amount of time to wait for a computation to start
+  COMPUTATION_START_TIMEOUT_SECONDS = 30
 
   def initialize(api_token, stream_endpoint)
     @api_token = api_token
@@ -45,35 +50,37 @@ class SignalFlowWebsocketTransport
   # create a properly initialized computation object.  Yields to the given
   # block which should send the WS message to start the job.
   def start_job
-    lock = Mutex.new
-    job_started_cv = ConditionVariable.new
     computation = nil
 
     channel = make_new_channel
-    channel.each_message_async do |msg, detach|
-      if msg[:event] == "JOB_START"
-        computation = Computation.new(msg[:handle], method(:attach), method(:stop))
-        channel.computation = computation
-        computation.channel = channel
-        lock.synchronize do
-          job_started_cv.signal
-        end
-      end
-    end
 
     yield channel.name
 
-    lock.synchronize do
-      if computation.nil?
-        timeout = 20
-        job_started_cv.wait(lock, timeout)
-        if computation.nil?
-          raise "Computation did not start within #{timeout} seconds"
-        end
+    while true
+      begin
+        msg = channel.pop(COMPUTATION_START_TIMEOUT_SECONDS)
+      rescue ChannelTimeout
+        raise "Computation did not start after at least #{COMPUTATION_START_TIMEOUT_SECONDS} seconds"
       end
-    end
+      if msg[:type] == "error"
+        raise ComputationFailure.new(msg[:message])
+      end
 
-    computation
+      # STREAM_START comes before this but contains no useful information
+      if msg[:event] == "JOB_START"
+        computation = Computation.new(msg[:handle], method(:attach), method(:stop))
+        computation.channel = channel
+      elsif msg[:type] == "computation-started"
+        computation = Computation.new(msg[:computationId], method(:attach), method(:stop))
+        # Start jobs only use the channel to get error messages and can
+        # detach from the channel once the job has started.
+        channel.detach
+      else
+        next
+      end
+
+      return computation
+    end
   end
 
   def execute(program, start: nil, stop: nil, resolution: nil, max_delay: nil, persistent: nil)
@@ -108,14 +115,17 @@ class SignalFlowWebsocketTransport
   end
 
   def start(program, start: nil, stop: nil, resolution: nil, max_delay: nil)
-    send_msg({
-      :type => "start",
-      :program => program,
-      :start => start,
-      :stop => stop,
-      :resolution => resolution,
-      :max_delay => max_delay,
-    }.reject!{|k,v| v.nil?}.to_json)
+    start_job do |channel_name|
+      send_msg({
+        :type => "start",
+        :channel => channel_name,
+        :program => program,
+        :start => start,
+        :stop => stop,
+        :resolution => resolution,
+        :max_delay => max_delay,
+      }.reject!{|k,v| v.nil?}.to_json)
+    end
   end
 
   def stop(handle, reason)
@@ -222,7 +232,9 @@ class SignalFlowWebsocketTransport
   # reactor.
   def startup_client
     this = self
-    WebSocket::Client::Simple.connect("#{@stream_endpoint}/v2/signalflow/connect") do |ws|
+    WebSocket::Client::Simple.connect("#{@stream_endpoint}/v2/signalflow/connect",
+                                      # Verification is disabled by default so this is essential
+                                      {verify_mode: OpenSSL::SSL::VERIFY_PEER}) do |ws|
       @ws = ws
       ws.on :error do |e|
         puts "ERROR #{e.inspect}"

@@ -23,7 +23,7 @@ class FakeSignalFlow
     @pipe = pipe
   end
 
-  def run_server(cert)
+  def run_server(cert=nil)
     Faye::WebSocket.load_adapter('thin')
     thin = Rack::Handler.get('thin')
 
@@ -78,16 +78,17 @@ class FakeSignalFlow
 
       ws.rack_response
     end, :Host => @host, :Port => @port) do |server|
-      server.ssl_options = {
-        :cert_chain_file  => cert.cert_path,
-        :private_key_file => cert.key_path,
-      }
-      server.ssl = true
-      @server = server
+      if cert
+        server.ssl_options = {
+          :cert_chain_file  => cert.cert_path,
+          :private_key_file => cert.key_path,
+        }
+        server.ssl = true
+      end
     end
   end
 
-  def run
+  def run_server_ssl
     cert = SelfSignedCertificate.new
     begin
       run_server(cert)
@@ -95,4 +96,5 @@ class FakeSignalFlow
       cert.unlink_files
     end
   end
+
 end

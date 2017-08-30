@@ -4,7 +4,7 @@ require 'thread'
 
 require_relative "./websocket"
 
-# A SignalFlow client that supports swappable .
+# A SignalFlow client that uses the WebSockets interface.
 class SignalFlowClient
   def initialize(api_token, api_endpoint, stream_endpoint)
     @transport = SignalFlowWebsocketTransport.new(api_token, stream_endpoint)
@@ -37,8 +37,8 @@ class SignalFlowClient
   # @option options [Fixnum] :max_delay
   #
   # @return [Computation] A {Computation} instance with an active channel
-  def preflight(program, start, stop, **options, &block)
-    @transport.preflight(program, start, stop, **options, &block)
+  def preflight(program, start, stop, **options)
+    @transport.preflight(program, start, stop, **options)
   end
 
   # Start a computation without attaching to it
@@ -47,6 +47,8 @@ class SignalFlowClient
   # computation to see any output.  It also will not return the handle id.
   #
   # Optional parameters are the same as {#execute}.
+  # @return [Computation] A {Computation} instance with a handle but without a
+  #   channel
   def start(program, **options)
     @transport.start(program, **options)
   end
@@ -56,5 +58,3 @@ class SignalFlowClient
     @transport.close
   end
 end
-
-

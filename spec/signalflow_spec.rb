@@ -1,8 +1,10 @@
 require 'socket'
+
 require 'timeout'
 require 'spec_helper'
 
 require_relative './fake_signalflow/server'
+require_relative './fake_signalflow/util'
 
 TOKEN = 'mytoken'
 
@@ -28,69 +30,19 @@ def wait_for_messages(count=1, timeout=10, &block)
   return messages
 end
 
-def wait_for_port_to_open(ip, port)
-  begin
-    Timeout::timeout(5) do
-      while true
-        begin
-          s = TCPSocket.new(ip, port)
-          s.close
-          return true
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH
-          sleep 0.1
-        end
-      end
-    end
-  rescue Timeout::Error
-  end
-
-  return false
-end
-
-def wait_for_notice(pipe, notice, timeout=3)
-  Timeout::timeout(timeout) do
-    while true
-      out = pipe.gets
-      next if out.nil?
-      if out.start_with? notice
-        return out.strip
-      end
-    end
-  end
-  fail "Did not receive notice #{notice} from server within #{timeout} seconds"
-end
-
 describe 'SignalFlow (Websocket)' do
   host = '127.0.5.55'
   port = 23456
   sf = nil
-  server_pid = nil
-  reader, writer = IO.pipe
+  kill_server = nil
+  reader = nil
 
   before(:all) do
-    # Fork off the fake server so that it doesn't interfere with the EM that
-    # runs the client.  The two do NOT coexist well at all.
-    pid = Process.fork
-    if !pid
-      # child proc
-      reader.close
-      # Turn off any output so it doesn't pollute test output
-      $stdout.reopen('/dev/null')
-      $stderr.reopen('/dev/null')
-      FakeSignalFlow.new(host, port, writer).run
-      exit
-    else
-      # original proc
-      writer.close
-      server_pid = pid
-      if !wait_for_port_to_open(host, port)
-        fail 'Fake SignalFlow server failed to start!'
-      end
-    end
+    kill_server, reader = start_fake(host, port, use_ssl: false)
   end
 
   before(:each) do
-    client = SignalFxClient.new 'GOOD_TOKEN', :stream_endpoint => "wss://#{host}:#{port}"
+    client = SignalFxClient.new 'GOOD_TOKEN', :stream_endpoint => "ws://#{host}:#{port}"
     sf = client.signalflow()
   end
 
@@ -99,10 +51,7 @@ describe 'SignalFlow (Websocket)' do
   end
 
   after(:all) do
-    if server_pid
-      # Kill it with INT to give it a chance to cleanup, if that matters
-      Process.kill("INT", server_pid)
-    end
+    kill_server.call if kill_server
   end
 
   it 'should authenticate before sending messages' do
@@ -112,7 +61,7 @@ describe 'SignalFlow (Websocket)' do
   end
 
   it 'should raise exception if auth is bad' do
-    client = SignalFxClient.new 'BAD_TOKEN', :stream_endpoint => "wss://#{host}:#{port}"
+    client = SignalFxClient.new 'BAD_TOKEN', :stream_endpoint => "ws://#{host}:#{port}"
     sf = client.signalflow()
 
     expect{ sf.execute("data('cpu.utilization').publish()") }.to raise_error(RuntimeError)
@@ -125,8 +74,8 @@ describe 'SignalFlow (Websocket)' do
       end
 
       expect(messages.length).to be > 2
-      expect(messages[0][:type]).to eq("control-message")
-      expect(messages[2][:type]).to eq("metadata")
+      expect(messages[0][:type]).to eq("metadata")
+      expect(messages[0][:tsId]).to eq("AAAAAEgCVmg")
     end
 
     it 'should not yield messages for another channel to block of execute()' do
@@ -149,23 +98,23 @@ describe 'SignalFlow (Websocket)' do
 
     it 'should decompress binary data messages correctly' do
       program = "data('cpu.utilization').publish()"
-      messages = wait_for_messages(EXECUTE[program].length) do |cb|
+      messages = wait_for_messages(EXECUTE[program].length-2) do |cb|
         sf.execute(program).each_message_async(&cb)
       end
 
       data_messages = messages.select {|m| m[:type] == "data"}
       expect(data_messages.length).to be > 0
-      expect(data_messages[0][:data][0][:timeseries_id]).to eq 467354735
+      expect(data_messages[0][:data][467354735]).to eq(1.9999999925494194)
     end
 
     it 'should decompress binary json messages correctly' do
       program = "data('cpu.utilization').publish()"
-      messages = wait_for_messages(EXECUTE[program].length) do |cb|
+      messages = wait_for_messages(EXECUTE[program].length-2) do |cb|
         sf.execute(program).each_message_async(&cb)
       end
 
       expect(messages.length).to be > 0
-      expect(messages[1][:type]).to eq "control-message"
+      expect(messages[0][:type]).to eq "metadata"
     end
 
     it 'should detach from computation when second arg of block is called' do
@@ -173,13 +122,11 @@ describe 'SignalFlow (Websocket)' do
       # Use the synchronous iterator so we don't have to wait for timeout
       sf.execute("data('cpu.utilization').publish()").each_message do |msg, detach|
         messages << msg
-        if msg[:event] == "JOB_START"
-          detach.call
-        end
+        detach.call
       end
 
-      expect(messages.length).to eq(2)
-      expect(messages[0][:type]).to eq("control-message")
+      expect(messages.length).to eq(1)
+      expect(messages[0][:type]).to eq("metadata")
     end
 
     it 'should return a computation object with an active channel' do
@@ -192,31 +139,80 @@ describe 'SignalFlow (Websocket)' do
       program = "data('cpu.utilization').publish()"
       comp = sf.execute(program)
 
-      messages = wait_for_messages(EXECUTE[program].length) do |cb|
-        comp.each_message_async(&cb)
+      messages = []
+      comp.each_message_async do |msg, detach|
+        messages << msg
       end
 
       comp.stop
 
       wait_for_notice(reader, ABORT_DONE_MESSAGE)
 
-      expect(messages.length).to be > 0
-      Timeout::timeout(1) do
-        while !messages.find {|m| m[:event] == "CHANNEL_ABORT"}
+      Timeout::timeout(5) do
+        while !messages.any? {|m| m.nil?}
         end
       end
       expect(comp.attached?).to be(false)
+    end
+
+    it 'should cache metadata about timeseries' do
+      program = "data('cpu.utilization').publish()"
+      comp = sf.execute(program)
+      wait_for_messages(EXECUTE[program].length-2) do |cb|
+        comp.each_message_async(&cb)
+      end
+
+      expect(comp.metadata["AAAAAEgCVmg"][:plugin]).to eq("signalfx-metadata")
+    end
+
+    it 'should handle batches of data with more than one message per batch' do
+      program = "data('cpu.utilization').publish(); data('if_octets.rx').publish()"
+      comp = sf.execute(program)
+
+      messages = []
+      comp.each_message_async do |msg, detach|
+        messages << msg
+      end
+
+      Timeout::timeout(5) do
+        while !(messages.select {|m| m[:type] == "data"}.length == 3)
+          sleep 0.5
+        end
+      end
     end
   end
 
   describe("Preflight") do
     it 'should yield received channel messages to block of preflight()' do
-      messages = wait_for_messages(2) do |cb|
+      messages = wait_for_messages(1) do |cb|
         sf.preflight("detect(data('cpu.utilization') > 70).publish()", 1503799830000, 1503799840000).each_message_async(&cb)
       end
 
       expect(messages.length).to be > 0
-      expect(messages[0][:type]).to eq("control-message")
+      expect(messages[0][:type]).to eq("metadata")
+    end
+  end
+
+  describe("SSL Verification") do
+    ssl_port = 23443
+    kill_server = nil
+
+    before(:all) do
+      kill_server, reader = start_fake(host, ssl_port, use_ssl: true)
+    end
+
+    after(:all) do
+      kill_server.call if kill_server
+    end
+
+    # A lot of the Ruby WebSocket clients turn verification off by default for
+    # some reason.  The fake server uses a self-signed cert so verification
+    # should fail.
+    it 'should verify the peer when using a TLS socket' do
+      client = SignalFxClient.new 'GOOD_TOKEN', :stream_endpoint => "wss://#{host}:#{ssl_port}"
+      sf = client.signalflow()
+
+      expect{ sf.execute("data('cpu.utilization').publish()") }.to raise_error(OpenSSL::SSL::SSLError)
     end
   end
 

@@ -8,9 +8,7 @@ module BinaryMessageParser
   # data should be a raw string
   def parse(data)
     # See https://developers.signalfx.com/v2/reference#section-binary-encoding-of-websocket-messages
-    # Second var is message type but we don't care about it since it is a
-    # rather opaque integer that can be many things when compression is on.
-    version, _, flags, _, channel, payload = data.unpack("CCb8CZ16a*")
+    version, message_type, flags, _, channel, payload = data.unpack("CCb8CZ16a*")
     compressed = flags[0] == "1"
     is_json = flags[1] == "1"
 
@@ -21,6 +19,8 @@ module BinaryMessageParser
     if compressed
       payload = Zlib::Inflate.new(16+Zlib::MAX_WBITS).inflate(payload)
     end
+
+    raise "Unknown binary message type #{message_type}" if !is_json && message_type != 5
 
     message = is_json ?
                 JSON.parse(payload, {:symbolize_names => true}) :
@@ -33,7 +33,7 @@ module BinaryMessageParser
   def parse_data_payload(payload)
     # See https://developers.signalfx.com/v2/reference#section-binary-encoding-used-for-the-websocket
     timestamp, element_count, tuples_raw = payload.unpack("Q>L>a*")
-    tuple_hashes = (0..element_count-1).map do |i|
+    data_hash = (0..element_count-1).map do |i|
       type, tsid, value_raw = tuples_raw[i*17..i*17+16].unpack("CQ>a8")
 
       value = case type
@@ -45,16 +45,17 @@ module BinaryMessageParser
                 value_raw.unpack("l>")
               end
 
-      {
-        :timeseries_id => tsid,
-        :value => value[0],
-      }
-    end
+      [
+        tsid,
+        value[0],
+      ]
+    end.to_h
 
     {
       :type => "data",
-      :timestampMs => timestamp,
-      :data => tuple_hashes,
+      :logicalTimestampMs => timestamp,
+      :logicalTimestamp => Time.at(timestamp / 1000.0),
+      :data => data_hash,
     }
   end
   module_function :parse_data_payload
