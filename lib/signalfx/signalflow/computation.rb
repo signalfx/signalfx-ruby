@@ -85,15 +85,17 @@ class Computation
   # method will not return until the channel is detached from (either manually
   # or due to the computation ending).
   #
-  # @yield [msg, detach] Called when a message arrives that is relevant to the
-  #   channel's computation.  The `detach` param will be set to a function that can
-  #   be called by the block to detach from the computation.
+  # Messages are queued in the channel so that none will be lost.
+  #
+  # @yield [msg, computation] Called when a message arrives that is relevant to the
+  #   channel's computation.  The `computation` param will be set to this
+  #   instance for easy referencing of computation metadata and state.
   def each_message(&block)
     raise "Computation #{@handle} is not attached to a channel" unless @channel
 
     while @channel
       msg = next_message
-      block.call(msg, method(:detach))
+      block.call(msg, self)
     end
 
     return
@@ -135,7 +137,7 @@ class Computation
         @batch_size_known = true
         out_messages << msg
         # We also know that the current batch is done
-        out_messages << reset_current_batch if @current_batch_size
+        (out_messages << reset_current_batch) if @current_batch_size > 0
 
       when "data"
         @state = DATA_STREAMING_STATE
@@ -164,6 +166,8 @@ class Computation
 
       when "error"
         raise ComputationFailure.new(msg[:errors])
+      else
+        out_messages << msg
       end
     end
 
@@ -200,7 +204,7 @@ class Computation
   # @return [Computation] This same computation instance with a now active
   # channel attached to it.
   def attach(**options)
-    raise "Computation #{@name} is already attached!" if @channel
+    raise "Computation #{@handle} is already attached!" if @channel
 
     @channel = @attach_func.call(@handle, **options)
     self

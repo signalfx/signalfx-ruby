@@ -165,33 +165,15 @@ now, the only supported transport mechanism is WebSockets.
 To create a new SignalFlow client instance from an existing SignalFx client:
 
 ```ruby
-sf = client.signalflow()
+signalflow = client.signalflow()
 ```
 
-To execute and attach to a SignalFlow computation, do the
-following:
-
-```ruby
-sf.execute("data('cpu.utilization').mean(by='host').publish()").each_message do |msg, detach|
-  case msg[:type]
-  when "data"
-    process_datapoints(msg.timestamp, msg.data)
-  end
-
-  if done_processing
-    detach.call
-  end
-end
-```
-
-For the full API see [the RubyDocs for the SignalFlow
+For the full API see [the RubyDocs for
+the SignalFlow
 client](http://www.rubydoc.info/github/signalfx/signalfx-ruby/master/SignalFlowClient/)
-(the `sf` var above).
+(the `signalflow` var above).
 
-The messages passed into the `each_message*` blocks will be decoded forms of
-what is described in [our API reference for
-SignalFlow](https://developers.signalfx.com/v2/reference#information-messages-specification).
-Hash keys will be symbols instead of strings.
+There is also [a demo script](./examples/signalflow.rb) that shows basic usage.
 
 ## License
 

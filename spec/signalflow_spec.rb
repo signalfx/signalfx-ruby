@@ -16,7 +16,7 @@ def wait_for_messages(count=1, timeout=10, &block)
   message_cv = ConditionVariable.new
   messages = []
 
-  yield ->(msg, detach){
+  yield ->(msg, comp){
     lock.synchronize do
       messages << msg
       message_cv.signal if messages.length == count
@@ -80,7 +80,7 @@ describe 'SignalFlow (Websocket)' do
 
     it 'should not yield messages for another channel to block of execute()' do
       got_bad_message_on_first = false
-      sf.execute("data('cpu.utilization').publish()").each_message_async do |msg, detach|
+      sf.execute("data('cpu.utilization').publish()").each_message_async do |msg, comp|
         if msg[:channel] != "channel-1"
           got_bad_message_on_first = true
         end
@@ -104,7 +104,7 @@ describe 'SignalFlow (Websocket)' do
 
       data_messages = messages.select {|m| m[:type] == "data"}
       expect(data_messages.length).to be > 0
-      expect(data_messages[0][:data][467354735]).to eq(1.9999999925494194)
+      expect(data_messages[0][:data]["AAAAABvbRG8"]).to eq(1.9999999925494194)
     end
 
     it 'should decompress binary json messages correctly' do
@@ -117,12 +117,12 @@ describe 'SignalFlow (Websocket)' do
       expect(messages[0][:type]).to eq "metadata"
     end
 
-    it 'should detach from computation when second arg of block is called' do
+    it 'should detach from computation when detach on computation is called' do
       messages = []
       # Use the synchronous iterator so we don't have to wait for timeout
-      sf.execute("data('cpu.utilization').publish()").each_message do |msg, detach|
+      sf.execute("data('cpu.utilization').publish()").each_message do |msg, comp|
         messages << msg
-        detach.call
+        comp.detach
       end
 
       expect(messages.length).to eq(1)
@@ -140,7 +140,7 @@ describe 'SignalFlow (Websocket)' do
       comp = sf.execute(program)
 
       messages = []
-      comp.each_message_async do |msg, detach|
+      comp.each_message_async do |msg|
         messages << msg
       end
 
@@ -170,7 +170,7 @@ describe 'SignalFlow (Websocket)' do
       comp = sf.execute(program)
 
       messages = []
-      comp.each_message_async do |msg, detach|
+      comp.each_message_async do |msg, comp|
         messages << msg
       end
 

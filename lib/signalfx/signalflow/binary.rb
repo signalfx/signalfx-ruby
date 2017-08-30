@@ -3,7 +3,7 @@
 require 'json'
 require 'zlib'
 
-# Converts binary websocket messages into a hash
+# Converts binary WebSocket messages into a hash
 module BinaryMessageParser
   # data should be a raw string
   def parse(data)
@@ -46,7 +46,7 @@ module BinaryMessageParser
               end
 
       [
-        tsid,
+        Base64.urlsafe_encode64([tsid].pack("Q>")).gsub("=", ""),
         value[0],
       ]
     end.to_h

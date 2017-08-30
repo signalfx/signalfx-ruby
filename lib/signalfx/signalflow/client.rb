@@ -5,6 +5,19 @@ require 'thread'
 require_relative "./websocket"
 
 # A SignalFlow client that uses the WebSockets interface.
+#
+# See https://developers.signalfx.com/v2/reference#signalflowconnect for
+# low-level API details and information on the SignalFlow language.
+#
+# See
+# {https://github.com/signalfx/signalfx-ruby/blob/master/examples/signalflow.rb}
+# for an example script that uses the client.
+#
+# The messages passed into the `computation.each_message*` blocks will be
+# decoded forms of what is described in
+# {https://developers.signalfx.com/v2/reference#information-messages-specification
+# our API reference for SignalFlow}.  Hash keys will be symbols instead of
+# strings.
 class SignalFlowClient
   def initialize(api_token, api_endpoint, stream_endpoint)
     @transport = SignalFlowWebsocketTransport.new(api_token, stream_endpoint)
@@ -43,8 +56,8 @@ class SignalFlowClient
 
   # Start a computation without attaching to it
   #
-  # This is currently not very useful because you cannot attach to the
-  # computation to see any output.  It also will not return the handle id.
+  # The `publish()` call in the program must specify a `metric` to publish the
+  # output to since you cannot currently attach to the output.
   #
   # Optional parameters are the same as {#execute}.
   # @return [Computation] A {Computation} instance with a handle but without a

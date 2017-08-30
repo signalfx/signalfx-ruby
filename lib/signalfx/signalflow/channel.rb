@@ -68,7 +68,10 @@ class Channel
   end
 
   def inject_message(msg)
-    raise 'Not expecting to receive message on detached channel' if @detached
+    # Since messages are injected by a separate websocket thread, they could
+    # come in after the user has detached manually from the channel.  Just
+    # silently ignore them in that case.
+    return if @detached
     raise 'Cannot inject nil message' if msg.nil?
 
     @messages << msg
