@@ -16,16 +16,17 @@ end
 client = SignalFx.new(token, enable_aws_unique_id: false, timeout: 3000)
 
 puts 'SignalFlow demo:'
+puts
 
 signalflow = client.signalflow()
 
 signalflow.execute("data('cpu.utilization').publish()").each_message do |msg, comp|
-  break puts comp.state if msg.nil?
-
   case msg[:type]
   when "data"
+    puts "#{'Host'.center(40, ' ')} | cpu.utilization"
     msg[:data].each do |tsid,value|
-      puts "Host #{comp.metadata[tsid][:host]}: #{value}"
+      puts "#{comp.metadata[tsid][:host][0..40].center(40, ' ')} | #{value}"
     end
   end
+  puts ""
 end

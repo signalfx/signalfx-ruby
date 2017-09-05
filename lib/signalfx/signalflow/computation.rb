@@ -16,6 +16,8 @@ class Computation
   attr_accessor :channel
   attr_accessor :state
   attr_accessor :metadata
+  attr_accessor :resolution
+  attr_accessor :input_timeseries_count
 
   def initialize(handle, attach_func, stop_func)
     @handle = handle
@@ -33,6 +35,9 @@ class Computation
     @expected_batch_size = 0
     @current_batch_data = nil
     @current_batch_size = nil
+
+    @resolution = nil
+    @input_timeseries_count = nil
   end
 
   def channel=(channel)
@@ -53,18 +58,12 @@ class Computation
   def next_message(timeout_seconds=nil)
     raise "Computation #{@handle} is not attached to a channel" unless @channel
 
-    # This intermediate message queue exists because data can come in batches.
-    # Due to the logic to determine these batches, the arrival of a single
-    # message on the channel might release multiple messages.  This is where
-    # those multiple messages can live until they are pulled off by the user
-    # calling `next_message`.
-    while @pending_messages.length == 0
+    msg = nil
+    while msg.nil? && !@channel.nil?
       # process_message might return no messages if it is building up a batch
-      msgs = process_message(@channel.pop(timeout_seconds))
-      msgs.each {|m| @pending_messages << m}
+      msg = process_message(@channel.pop(timeout_seconds))
     end
-
-    @pending_messages.pop
+    return msg
   end
 
   # Iterates over the messages asynchronously for this computation.  A convenience
@@ -85,11 +84,13 @@ class Computation
   # method will not return until the channel is detached from (either manually
   # or due to the computation ending).
   #
-  # Messages are queued in the channel so that none will be lost.
+  # Messages are queued in the channel so that none will be lost if this method
+  # is not called immediately.
   #
-  # @yield [msg, computation] Called when a message arrives that is relevant to the
-  #   channel's computation.  The `computation` param will be set to this
-  #   instance for easy referencing of computation metadata and state.
+  # @yield [msg, comp] Called when a message arrives that is relevant to the
+  #   channel's computation.  The `comp` param will be set to this computation
+  #   instance for easy referencing of computation metadata and state.  `comp`
+  #   may be omitted if this reference to the computation is not needed.
   def each_message(&block)
     raise "Computation #{@handle} is not attached to a channel" unless @channel
 
@@ -103,22 +104,20 @@ class Computation
 
   # Process the given message
   def process_message(msg)
-    out_messages = []
     # nil is like EOF for channels
     if msg.nil?
       @channel = nil
-      out_messages << reset_current_batch
-      out_messages << nil
+      reset_current_batch
     else
       # Sniff messages and update computation
       case msg[:type]
       when "metadata"
         @metadata[msg[:tsId]] = msg[:properties]
-        out_messages << msg
+        msg
 
       when "expired-tsid"
         @metadata.delete(msg[:tsId])
-        out_messages << msg
+        msg
 
       when "control-message"
         case msg[:event]
@@ -128,16 +127,24 @@ class Computation
           @state = COMPLETED_STATE
         end
 
-        out_messages << msg
+        msg
 
       when "message"
+        # Don't let users see any messages of this type, but use them to update
+        # computation state that the user can access.
+        case msg[:messageCode]
+        when 'JOB_RUNNING_RESOLUTION'
+          @resolution = msg[:contents][:resolutionMs]
+        when 'FETCH_NUM_TIMESERIES'
+          @input_timeseries_count = msg[:numInputTimeSeries]
+        end
+
         # The server guarantees that an initial batch of data will be sent before
         # the first "message" message.  Therefore, when we see a message of this
         # type, we know we have determined the batch size.
         @batch_size_known = true
-        out_messages << msg
-        # We also know that the current batch is done
-        (out_messages << reset_current_batch) if @current_batch_size > 0
+        # We also know that the current batch (if any) is done
+        reset_current_batch
 
       when "data"
         @state = DATA_STREAMING_STATE
@@ -149,29 +156,31 @@ class Computation
           @expected_batch_size += 1
         end
 
+        out = nil
         if @current_batch_data && msg.fetch(:logicalTimestampMs) != @current_batch_data.fetch(:logicalTimestampMs)
           # Two data messages back to back with different timestamps before
           # receiving the first "message" message indicate that the previous
           # batch is done and our batch size is now whatever the total data
           # messages seen up until this point.
           @batch_size_known = true
-          out_messages << reset_current_batch
+          out = reset_current_batch
           add_to_current_batch(msg)
         else
           add_to_current_batch(msg)
           if @batch_size_known && @current_batch_size == @expected_batch_size
-            out_messages << reset_current_batch
+            out = reset_current_batch
           end
         end
 
+        out
+
       when "error"
         raise ComputationFailure.new(msg[:errors])
+
       else
-        out_messages << msg
+        msg
       end
     end
-
-    out_messages
   end
   private :process_message
 

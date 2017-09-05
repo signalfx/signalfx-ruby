@@ -69,11 +69,11 @@ describe 'SignalFlow (Websocket)' do
 
   describe("Execute") do
     it 'should yield received channel messages to block of channel' do
-      messages = wait_for_messages(3) do |cb|
+      messages = wait_for_messages(2) do |cb|
         sf.execute("data('cpu.utilization').publish()").each_message_async(&cb)
       end
 
-      expect(messages.length).to be > 2
+      expect(messages.length).to be >= 2
       expect(messages[0][:type]).to eq("metadata")
       expect(messages[0][:tsId]).to eq("AAAAAEgCVmg")
     end
@@ -92,14 +92,13 @@ describe 'SignalFlow (Websocket)' do
         sf.execute("data('cpu.utilization').publish()").each_message_async(&cb)
       end
 
-      expect(messages.length).to be > 1
+      expect(messages.length).to be >= 1
       expect(got_bad_message_on_first).to be(false)
     end
 
     it 'should decompress binary data messages correctly' do
-      program = "data('cpu.utilization').publish()"
-      messages = wait_for_messages(EXECUTE[program].length-2) do |cb|
-        sf.execute(program).each_message_async(&cb)
+      messages = wait_for_messages(2) do |cb|
+        sf.execute("data('cpu.utilization').publish()").each_message_async(&cb)
       end
 
       data_messages = messages.select {|m| m[:type] == "data"}
@@ -109,7 +108,7 @@ describe 'SignalFlow (Websocket)' do
 
     it 'should decompress binary json messages correctly' do
       program = "data('cpu.utilization').publish()"
-      messages = wait_for_messages(EXECUTE[program].length-2) do |cb|
+      messages = wait_for_messages(2) do |cb|
         sf.execute(program).each_message_async(&cb)
       end
 
@@ -139,26 +138,21 @@ describe 'SignalFlow (Websocket)' do
       program = "data('cpu.utilization').publish()"
       comp = sf.execute(program)
 
-      messages = []
-      comp.each_message_async do |msg|
-        messages << msg
-      end
-
-      comp.stop
-
-      wait_for_notice(reader, ABORT_DONE_MESSAGE)
-
+      done = false
       Timeout::timeout(5) do
-        while !messages.any? {|m| m.nil?}
+        comp.each_message do |msg|
+          comp.stop
+          wait_for_notice(reader, ABORT_DONE_MESSAGE)
         end
+        done = true
       end
+      expect(done).to be(true)
       expect(comp.attached?).to be(false)
     end
 
     it 'should cache metadata about timeseries' do
-      program = "data('cpu.utilization').publish()"
-      comp = sf.execute(program)
-      wait_for_messages(EXECUTE[program].length-2) do |cb|
+      comp = sf.execute("data('cpu.utilization').publish()")
+      wait_for_messages(2) do |cb|
         comp.each_message_async(&cb)
       end
 
@@ -170,7 +164,7 @@ describe 'SignalFlow (Websocket)' do
       comp = sf.execute(program)
 
       messages = []
-      comp.each_message_async do |msg, comp|
+      comp.each_message_async do |msg|
         messages << msg
       end
 
