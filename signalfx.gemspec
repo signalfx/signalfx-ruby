@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["info@signalfx.com"]
 
   spec.summary       = "Ruby client library for SignalFx"
-  spec.description   = "This is a programmatic interface in Ruby for SignalFx's metadata and ingest APIs. It is meant to provide a base for communicating with SignalFx APIs that can be easily leveraged by scripts and applications to interact with SignalFx or report metric and event data to SignalFx. Library supports Ruby 2.x versions"
+  spec.description   = "This is a programmatic interface in Ruby for SignalFx's metadata and ingest APIs. It is meant to provide a base for communicating with SignalFx APIs that can be easily leveraged by scripts and applications to interact with SignalFx or report metric and event data to SignalFx. Library supports Ruby 2.2.x+ versions"
   spec.homepage      = "https://signalfx.com"
   spec.license       = "Apache Software License v2 © SignalFx"
 
@@ -33,6 +33,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 10.0"
   spec.add_development_dependency "rspec", "~> 3.3"
   spec.add_development_dependency "webmock", "~> 2.1"
+  spec.add_development_dependency "thin", "~> 1.7"
+  spec.add_development_dependency "pry"
+  spec.add_development_dependency "faye-websocket", "~> 0.10.7"
   spec.add_dependency "protobuf", "~> 3.5.1", ">= 3.5.1"
   spec.add_dependency "rest-client", "~> 2.0"
+  spec.add_dependency 'websocket-client-simple', "~> 0.3.0"
 end

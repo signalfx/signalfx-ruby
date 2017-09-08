@@ -155,6 +155,26 @@ client.send_event(
 See `examples/generic_usecase.rb` for a complete code example for
 sending events.
 
+### SignalFlow
+
+You can run SignalFlow computations as well.  This library supports all of the
+functionality described in our [API docs for
+SignalFlow](https://developers.signalfx.com/reference#signalflowconnect). Right
+now, the only supported transport mechanism is WebSockets.
+
+To create a new SignalFlow client instance from an existing SignalFx client:
+
+```ruby
+signalflow = client.signalflow()
+```
+
+For the full API see [the RubyDocs for
+the SignalFlow
+client](http://www.rubydoc.info/github/signalfx/signalfx-ruby/master/SignalFlowClient/)
+(the `signalflow` var above).
+
+There is also [a demo script](./examples/signalflow.rb) that shows basic usage.
+
 ## License
 
 Apache Software License v2. Copyright © 2015-2016
