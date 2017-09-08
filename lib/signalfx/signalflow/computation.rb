@@ -18,6 +18,7 @@ class Computation
   attr_accessor :metadata
   attr_accessor :resolution
   attr_accessor :input_timeseries_count
+  attr_accessor :last_timestamp_seen
 
   def initialize(handle, attach_func, stop_func)
     @handle = handle
@@ -36,6 +37,7 @@ class Computation
     @current_batch_data = nil
     @current_batch_size = nil
 
+    @last_timestamp_seen = nil
     @resolution = nil
     @input_timeseries_count = nil
   end
@@ -136,7 +138,7 @@ class Computation
         when 'JOB_RUNNING_RESOLUTION'
           @resolution = msg[:contents][:resolutionMs]
         when 'FETCH_NUM_TIMESERIES'
-          @input_timeseries_count = msg[:numInputTimeSeries]
+          @input_timeseries_count += msg[:numInputTimeSeries]
         end
 
         # The server guarantees that an initial batch of data will be sent before
@@ -202,6 +204,7 @@ class Computation
     msg = @current_data_batch
     @current_data_batch = nil
     @current_batch_size = 0
+    @last_timestamp_seen = msg.fetch(:logicalTimestampMs) if !msg.nil?
     msg
   end
   private :reset_current_batch
