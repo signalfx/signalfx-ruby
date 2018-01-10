@@ -140,16 +140,18 @@ events are supported. Available categories of events are `USER_DEFINED`,
 ```ruby
 require('signalfx')
 
+timestamp = (Time.now.to_i * 1000).to_i
+
 client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
 client.send_event(
-    '[event_type]',
-    '[event_category]',
-    { host: 'myhost',
+    '<event_type>',
+    event_category: '<event_category>',
+    dimensions: { host: 'myhost',
       service: 'myservice',
       instance: 'myinstance' },
-    properties={ version: 'event_version' },
-    timestamp)
+    properties: { version: 'event_version' },
+    timestamp: timestamp)
 ```
 
 See `examples/generic_usecase.rb` for a complete code example for
