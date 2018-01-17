@@ -3,7 +3,6 @@
 require 'json'
 require 'thread'
 require 'websocket-client-simple'
-require 'eventmachine'
 
 require_relative './binary'
 require_relative './channel'
