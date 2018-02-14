@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "thin", "~> 1.7"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "faye-websocket", "~> 0.10.7"
-  spec.add_dependency "protobuf", "~> 3.5.1", ">= 3.5.1"
+  spec.add_dependency "protobuf", ">= 3.5.1"
   spec.add_dependency "rest-client", "~> 2.0"
   spec.add_dependency 'websocket-client-simple', "~> 0.3.0"
 end
