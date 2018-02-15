@@ -31,7 +31,7 @@ def wait_for_messages(count=1, timeout=10, &block)
 end
 
 describe 'SignalFlow (Websocket)' do
-  host = '127.0.5.55'
+  host = '127.0.0.1'
   port = 23456
   sf = nil
   kill_server = nil
