@@ -82,7 +82,7 @@ class SignalFlowWebsocketTransport
     end
   end
 
-  def execute(program, start: nil, stop: nil, resolution: nil, max_delay: nil, persistent: nil)
+  def execute(program, start: nil, stop: nil, resolution: nil, max_delay: nil, persistent: nil, immediate: false)
     start_job do |channel_name|
       send_msg({
         :type => "execute",
@@ -93,6 +93,7 @@ class SignalFlowWebsocketTransport
         :resolution => resolution,
         :max_delay => max_delay,
         :persistent => persistent,
+        :immediate => immediate,
         :compress => @compress,
       }.reject!{|k,v| v.nil?}.to_json)
     end
@@ -313,4 +314,3 @@ class SignalFlowWebsocketTransport
   end
   private :make_new_channel
 end
-
