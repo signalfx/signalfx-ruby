@@ -34,12 +34,13 @@ class SignalFlowClient
   # @option options [Fixnum] :resolution
   # @option options [Fixnum] :max_delay
   # @option options [Boolean] :persistent
+  # @option options [Boolean] :immediate
   #
   # @return [Computation] A {Computation} instance with an active channel
   def execute(program, **options)
     @transport.execute(program, **options)
   end
-  
+
   # Start and attach to a computation that tells how many times a detector
   # would have fired in a time range between `start` and `stop`.
   #
