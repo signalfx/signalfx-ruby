@@ -92,6 +92,11 @@ datapoints will not accurately represent the time of their measurement
 (network latency, batching, etc. will all impact when those datapoints
 actually make it to SignalFx).
 
+#### Reporting data through a HTTP proxy
+
+To send data through a HTTP proxy, set the environment variable `http_proxy`
+with the proxy URL.
+
 ### Sending multi-dimensional data
 
 Reporting dimensions for the data is also optional, and can be
