@@ -34,7 +34,7 @@ The default constructor `SignalFx` uses Protobuf to send data to SignalFx. If it
 ```ruby
 require('signalfx')
 
-// Create client
+# Create client
 client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 ```
 
