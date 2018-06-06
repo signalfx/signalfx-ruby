@@ -25,7 +25,7 @@ class ProtoBufSignalFx < SignalFxClient
       if datapoint_value.kind_of?(Float)
         protobuf_datapoint.value = Com::Signalfx::Metrics::Protobuf::Datum.new :doubleValue => datapoint_value
       else
-        if datapoint_value.kind_of?(Fixnum)
+        if datapoint_value.kind_of?(Integer)
           protobuf_datapoint.value = Com::Signalfx::Metrics::Protobuf::Datum.new :intValue => datapoint_value
         else
           throw TypeError('Invalid Value ' + datapoint_value);
@@ -96,7 +96,7 @@ class ProtoBufSignalFx < SignalFxClient
         if prop_value.kind_of?(Float)
           property.value = Com::Signalfx::Metrics::Protobuf::PropertyValue.new :doubleValue => prop_value
         else
-          if prop_value.kind_of?(Fixnum)
+          if prop_value.kind_of?(Integer)
             property.value = Com::Signalfx::Metrics::Protobuf::PropertyValue.new :intValue => prop_value
           else
             throw TypeError('Invalid Value ' + prop_value);
