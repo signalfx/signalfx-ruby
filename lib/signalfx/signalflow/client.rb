@@ -29,10 +29,10 @@ class SignalFlowClient
   #
   # See https://developers.signalfx.com/reference#section-execute-a-computation
   #
-  # @option options [Fixnum] :start
-  # @option options [Fixnum] :stop
-  # @option options [Fixnum] :resolution
-  # @option options [Fixnum] :max_delay
+  # @option options [Integer] :start
+  # @option options [Integer] :stop
+  # @option options [Integer] :resolution
+  # @option options [Integer] :max_delay
   # @option options [Boolean] :persistent
   # @option options [Boolean] :immediate
   #
@@ -46,9 +46,9 @@ class SignalFlowClient
   #
   # See https://developers.signalfx.com/v2/reference#signalflowpreflight
   #
-  # @param start [Fixnum]
-  # @param stop [Fixnum]
-  # @option options [Fixnum] :max_delay
+  # @param start [Integer]
+  # @param stop [Integer]
+  # @option options [Integer] :max_delay
   #
   # @return [Computation] A {Computation} instance with an active channel
   def preflight(program, start, stop, **options)
