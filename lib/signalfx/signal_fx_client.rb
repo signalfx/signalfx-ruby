@@ -208,7 +208,7 @@ class SignalFxClient
 
       headers = {HEADER_CONTENT_TYPE => header_content_type,
                  HEADER_API_TOKEN_KEY => @api_token,
-                 HEADER_USER_AGENT_KEY => Version::NAME + '/' + Version::VERSION + http_user_agents}
+                 HEADER_USER_AGENT_KEY => SignalFx::Version::NAME + '/' + SignalFx::Version::VERSION + http_user_agents}
 
       RestClient::Request.execute(
           method: :post,

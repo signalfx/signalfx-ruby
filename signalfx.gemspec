@@ -5,7 +5,7 @@ require_relative 'lib/signalfx/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "signalfx"
-  spec.version       = Version::VERSION
+  spec.version       = SignalFx::Version::VERSION
   spec.authors       = ["SignalFx, Inc"]
   spec.email         = ["info@signalfx.com"]
 
