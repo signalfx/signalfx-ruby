@@ -70,7 +70,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1,\"dimensions\":{}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2,\"dimensions\":{}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -95,7 +95,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://custom-ingest.endpoint/v2/event").
         with(:body => "[{\"category\":\"USER_DEFINED\",\"eventType\":\"deployments\",\"dimensions\":{\"host\":\"myhost\",\"service\":\"myservice\",\"instance\":\"myinstance\"},\"properties\":{\"version\":\"12345\"},\"timestamp\":1234567890}]",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -112,7 +112,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1,\"dimensions\":{}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2,\"dimensions\":{}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -125,7 +125,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1.1,\"dimensions\":{}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2.2,\"dimensions\":{}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -138,7 +138,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":\"111\",\"dimensions\":{}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":\"222\",\"dimensions\":{}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -151,7 +151,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1,\"timestamp\":1234567890,\"dimensions\":{}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2,\"timestamp\":1234567890,\"dimensions\":{}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -164,7 +164,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => "{\"gauge\":[{\"metric\":\"test.cpu\",\"value\":1,\"dimensions\":{\"host\":\"server1\",\"host_ip\":\"1.2.3.4\"}}],\"counter\":[{\"metric\":\"cpu_cnt\",\"value\":2,\"dimensions\":{\"host\":\"server1\",\"host_ip\":\"1.2.3.4\"}}]}",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -183,7 +183,7 @@ describe 'SignalFx(JSON mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/event").
         with(:body => "[{\"category\":\"USER_DEFINED\",\"eventType\":\"deployments\",\"dimensions\":{\"host\":\"myhost\",\"service\":\"myservice\",\"instance\":\"myinstance\"},\"properties\":{\"version\":\"12345\"},\"timestamp\":1234567890}]",
-             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/json', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -213,7 +213,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
         with(:body => StringIO.new("\n\x10\x12\btest.cpu\"\x02\x18\x01(\x00\n\x0F\x12\acpu_cnt\"\x02\x18\x02(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -232,7 +232,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://custom-ingest.endpoint/v2/datapoint").
         with(:body => StringIO.new("\n\x10\x12\btest.cpu\"\x02\x18\x01(\x00\n\x0F\x12\acpu_cnt\"\x02\x18\x02(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -258,7 +258,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://custom-ingest.endpoint/v2/event").
         with(:body => StringIO.new("\ni\n\vdeployments\x12\x0E\n\x04host\x12\x06myhost\x12\x14\n\aservice\x12\tmyservice\x12\x16\n\binstance\x12\nmyinstance\x1A\x12\n\aversion\x12\a\n\x0512345 \xC0\x84=(\xD2\x85\xD8\xCC\x04").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + ', ua_1, ua_2', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -271,7 +271,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => StringIO.new("\n\x10\x12\btest.cpu\"\x02\x18\x01(\x00\n\x0F\x12\acpu_cnt\"\x02\x18\x02(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -284,7 +284,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => StringIO.new("\n\x17\x12\btest.cpu\"\t\x11\x9A\x99\x99\x99\x99\x99\xF1?(\x00\n\x16\x12\acpu_cnt\"\t\x11\x9A\x99\x99\x99\x99\x99\x01@(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type'=>'application/x-protobuf', 'User-Agent'=>'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token'=>TOKEN,
+             :headers => {'Content-Type'=>'application/x-protobuf', 'User-Agent'=>'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token'=>TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK")
 
@@ -297,7 +297,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => StringIO.new("\n\x13\x12\btest.cpu\"\x05\n\x03111(\x00\n\x12\x12\acpu_cnt\"\x05\n\x03111(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -310,7 +310,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => StringIO.new("\n\x16\x12\btest.cpu\x18\xD2\x85\xD8\xCC\x04\"\x02\x18\x01(\x00\n\x15\x12\acpu_cnt\x18\xD2\x85\xD8\xCC\x04\"\x02\x18\x02(\x01").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -323,7 +323,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/datapoint").
         with(:body => StringIO.new("\n5\x12\btest.cpu\"\x02\x18\x01(\x002\x0F\n\x04host\x12\aserver12\x12\n\ahost_ip\x12\a1.2.3.4\n4\x12\acpu_cnt\"\x02\x18\x02(\x012\x0F\n\x04host\x12\aserver12\x12\n\ahost_ip\x12\a1.2.3.4").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
@@ -342,7 +342,7 @@ describe 'SignalFx(Protobuf mode)' do
 
     stub_request(:post, "https://ingest.signalfx.com/v2/event").
         with(:body => StringIO.new("\ni\n\vdeployments\x12\x0E\n\x04host\x12\x06myhost\x12\x14\n\aservice\x12\tmyservice\x12\x16\n\binstance\x12\nmyinstance\x1A\x12\n\aversion\x12\a\n\x0512345 \xC0\x84=(\xD2\x85\xD8\xCC\x04").set_encoding('ascii-8bit').string,
-             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + Version::VERSION + '', 'X-Sf-Token' => TOKEN,
+             :headers => {'Content-Type' => 'application/x-protobuf', 'User-Agent' => 'signalfx-ruby-client/' + SignalFx::Version::VERSION + '', 'X-Sf-Token' => TOKEN,
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
