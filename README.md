@@ -21,6 +21,14 @@ Or install it yourself as:
 
     $ gem install signalfx
 
+#### Installing with Ruby 2.2.0 and 2.2.1
+
+This library's protobuf dependency requires activesupport >=3.2.  5.x versions of activesupport require Ruby >=2.2.2,
+so users of older Ruby versions will need to install activesupport 4.2.10 before signalfx to avoid attempts of
+installing a more recent gem.  Building and installing signalfx from source will fulfill this for you:
+
+    $ gem build signalfx.gemspec && gem install signalfx-<current_version>.gem
+
 ## Usage
 
 ### API access token
