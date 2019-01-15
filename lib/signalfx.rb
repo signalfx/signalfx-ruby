@@ -25,7 +25,8 @@ module SignalFx
                ingest_endpoint: RbConfig::DEFAULT_INGEST_ENDPOINT,
                timeout: RbConfig::DEFAULT_TIMEOUT,
                batch_size: RbConfig::DEFAULT_BATCH_SIZE,
-               user_agents: [])
+               user_agents: [],
+               logger: Logger.new(STDOUT, progname: "SignalFX"))
     begin
       require_relative './proto/signal_fx_protocol_buffers.pb'
       ProtoBufSignalFx.new(api_token,
@@ -36,8 +37,8 @@ module SignalFx
                            user_agents: user_agents)
 
     rescue Exception => e
-      puts "Protocol Buffers not installed properly. Switching to JSON.
-            #{e}"
+      logger.warn("Protocol Buffers not installed properly. Switching to JSON.
+            #{e}")
       JsonSignalFx.new(api_token,
                        enable_aws_unique_id: enable_aws_unique_id,
                        ingest_endpoint: ingest_endpoint,
