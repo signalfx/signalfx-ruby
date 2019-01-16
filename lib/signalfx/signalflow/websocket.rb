@@ -17,7 +17,7 @@ class SignalFlowWebsocketTransport
   # A lower bound on the amount of time to wait for a computation to start
   COMPUTATION_START_TIMEOUT_SECONDS = 30
 
-  def initialize(api_token, stream_endpoint, logger = Logger.new(STDOUT, progname: "signalfx"))
+  def initialize(api_token, stream_endpoint, logger: Logger.new(STDOUT, progname: "signalfx"))
     @api_token = api_token
     @stream_endpoint = stream_endpoint
     @logger = logger
