@@ -26,7 +26,7 @@ module SignalFx
                timeout: RbConfig::DEFAULT_TIMEOUT,
                batch_size: RbConfig::DEFAULT_BATCH_SIZE,
                user_agents: [],
-               logger: Logger.new(STDOUT, progname: "SignalFX"))
+               logger: Logger.new(STDOUT, progname: "signalfx"))
     begin
       require_relative './proto/signal_fx_protocol_buffers.pb'
       ProtoBufSignalFx.new(api_token,

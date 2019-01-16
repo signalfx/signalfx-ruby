@@ -36,7 +36,7 @@ class SignalFxClient
                  timeout: RbConfig::DEFAULT_TIMEOUT,
                  batch_size: RbConfig::DEFAULT_BATCH_SIZE,
                  user_agents: [],
-                 logger: Logger.new(STDOUT, progname: "SignalFX"))
+                 logger: Logger.new(STDOUT, progname: "signalfx"))
 
     @api_token = api_token
     @ingest_endpoint = ingest_endpoint
