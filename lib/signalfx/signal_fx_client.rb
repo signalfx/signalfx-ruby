@@ -35,7 +35,8 @@ class SignalFxClient
                  stream_endpoint: RbConfig::DEFAULT_STREAM_ENDPOINT,
                  timeout: RbConfig::DEFAULT_TIMEOUT,
                  batch_size: RbConfig::DEFAULT_BATCH_SIZE,
-                 user_agents: [])
+                 user_agents: [],
+                 logger: Logger.new(STDOUT, progname: "signalfx"))
 
     @api_token = api_token
     @ingest_endpoint = ingest_endpoint
@@ -44,6 +45,7 @@ class SignalFxClient
     @timeout = timeout
     @batch_size = batch_size
     @user_agents = user_agents
+    @logger = logger
 
     @aws_unique_id = nil
 
@@ -55,9 +57,9 @@ class SignalFxClient
         if request != nil
           json_resp = JSON.parse(request.body)
           @aws_unique_id = json_resp['instanceId']+'_'+json_resp['region']+'_'+json_resp['accountId']
-          puts("AWS Unique ID loaded: #{@aws_unique_id}")
+          @logger.info("AWS Unique ID loaded: #{@aws_unique_id}")
         else
-          puts('Failed to retrieve AWS unique ID.')
+          @logger.warn('Failed to retrieve AWS unique ID.')
         end
       }
     end
@@ -223,14 +225,14 @@ class SignalFxClient
               block.call(response)
             end
           else
-            puts "Failed to send datapoints. Response code: #{response.code}"
+            @logger.error("Failed to send datapoints. Response code: #{response.code}")
             if block
               block.call(nil)
             end
         end
       }
     rescue Exception => e
-      puts "Failed to send datapoints. Error: #{e}"
+      @logger.error("Failed to send datapoints. Error: #{e}")
       if block
         block.call(nil)
       end
@@ -246,12 +248,12 @@ class SignalFxClient
           when 200
             return block.call(response)
           else
-            puts "Failed to retrieve AWS unique ID. Response code: #{response.code}"
+            @logger.warn("Failed to retrieve AWS unique ID. Response code: #{response.code}")
             return block.call(nil)
         end
       }
     rescue Exception => e
-      puts "Failed to retrieve AWS unique ID. Error: #{e}"
+      @logger.warn("Failed to retrieve AWS unique ID. Error: #{e}")
       block.call(nil)
     end
   end

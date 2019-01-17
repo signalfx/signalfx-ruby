@@ -17,9 +17,10 @@ class SignalFlowWebsocketTransport
   # A lower bound on the amount of time to wait for a computation to start
   COMPUTATION_START_TIMEOUT_SECONDS = 30
 
-  def initialize(api_token, stream_endpoint)
+  def initialize(api_token, stream_endpoint, logger: Logger.new(STDOUT, progname: "signalfx"))
     @api_token = api_token
     @stream_endpoint = stream_endpoint
+    @logger = logger
     @compress = true
 
     @lock = Mutex.new
@@ -217,7 +218,7 @@ class SignalFlowWebsocketTransport
 
       message_received(m.data, m.type == :text)
     rescue Exception => e
-      puts "Error processing SignalFlow message: #{e.backtrace.first}: #{e.message} (#{e.class})"
+      @logger.error("Error processing SignalFlow message: #{e.backtrace.first}: #{e.message} (#{e.class})")
     end
   end
 
@@ -237,7 +238,7 @@ class SignalFlowWebsocketTransport
                                       {verify_mode: OpenSSL::SSL::VERIFY_PEER}) do |ws|
       @ws = ws
       ws.on :error do |e|
-        puts "ERROR #{e.inspect}"
+        @logger.error("ERROR #{e.inspect}")
       end
 
       ws.on :close do |e|
