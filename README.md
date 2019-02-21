@@ -4,6 +4,7 @@ This is a programmatic interface in Ruby for SignalFx's metadata and
 ingest APIs. It is meant to provide a base for communicating with
 SignalFx APIs that can be easily leveraged by scripts and applications
 to interact with SignalFx or report metric and event data to SignalFx.
+You will need a SignalFx account and an access token to use them.
 
 This library supports Ruby versions 2.2.x and above.
 
@@ -31,9 +32,33 @@ installing a more recent gem.  Building and installing signalfx from source will
 
 ## Usage
 
-### API access token
 
-To use this library, you need a SignalFx API access token, which can be obtained from the SignalFx organization you want to report data into.
+### Configuring your endpoints
+
+In order to send your data to the correct realm, you may need to configure your 
+endpoints. If no endpoints are set manually, this library uses the ``us0`` realm by default. 
+If you are not in this realm, you will need to explicitly set the
+endpoint config options below. To determine if you are in a different realm and need to
+explicitly set the endpoints, check your profile page in the SignalFx 
+web application. 
+
+```ruby
+require('signalfx')
+# Create client with alternate ingest endpoint
+client = SignalFx.new('ORG_TOKEN', ingest_endpoint: 'https://ingest.{REALM}.signalfx.com',
+                      stream_endpoint: 'https:/stream.{REALM}.signalfx.com')
+
+```
+
+### Access tokens
+
+To use this library, you will also need to specify an access token when requesting
+one of those clients. For the ingest client, you need to specify your
+organization access token (which can be obtained from the
+SignalFx organization you want to report data into). For the SignalFlow client, either an
+organization access token or a user access token may be used. For more
+information on access tokens, see the API's [authentication documentation](https://developers.signalfx.com/basics/authentication.html).
+
 
 ### Create client
 
@@ -55,7 +80,7 @@ Optional constructor parameters:
   deployed on Amazon AWS.
 + **ingest_endpoint** (string): to override the target ingest API
   endpoint.
-+ **api_endpoint** (string): to override the target REST API endpoint.
++ **stream_endpoint** (string): to override the target stream API for SignalFlow.
 + **timeout** (number): timeout, in seconds, for requests to SignalFx.
 + **batch_size** (number): size of datapoint batches to send to
   SignalFx.
@@ -174,8 +199,22 @@ sending events.
 
 You can run SignalFlow computations as well.  This library supports all of the
 functionality described in our [API docs for
-SignalFlow](https://developers.signalfx.com/reference#signalflowconnect). Right
+SignalFlow](https://developers.signalfx.com/signalflow_reference.html). Right
 now, the only supported transport mechanism is WebSockets.
+
+#### Configure the SignalFlow client endpoint
+
+By default, this library connects to the `us0` stream endpoint.
+If you are not in this realm, you will need to explicitly set the
+endpoint config options below when creating the client. 
+To determine if you are in a different realm and need to
+explicitly set the endpoints, check your profile page in the SignalFx web application.
+
+```ruby
+client = SignalFx.new('ORG_TOKEN', ingest_endpoint: 'https://ingest.{REALM}.signalfx.com',
+                      stream_endpoint: 'https:/stream.{REALM}.signalfx.com')
+```
+
 
 To create a new SignalFlow client instance from an existing SignalFx client:
 
