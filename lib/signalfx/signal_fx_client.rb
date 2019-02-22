@@ -31,7 +31,6 @@ class SignalFxClient
   def initialize(api_token,
                  enable_aws_unique_id: false,
                  ingest_endpoint: RbConfig::DEFAULT_INGEST_ENDPOINT,
-                 api_endpoint: RbConfig::DEFAULT_API_ENDPOINT,
                  stream_endpoint: RbConfig::DEFAULT_STREAM_ENDPOINT,
                  timeout: RbConfig::DEFAULT_TIMEOUT,
                  batch_size: RbConfig::DEFAULT_BATCH_SIZE,
@@ -40,7 +39,6 @@ class SignalFxClient
 
     @api_token = api_token
     @ingest_endpoint = ingest_endpoint
-    @api_endpoint = api_endpoint
     @stream_endpoint = stream_endpoint
     @timeout = timeout
     @batch_size = batch_size
@@ -174,7 +172,7 @@ class SignalFxClient
   # @return [SignalFlowClient] a newly instantiated client, configured with the
   #   api token and endpoints from this class
   def signalflow
-    SignalFlowClient.new(@api_token, @api_endpoint, @stream_endpoint)
+    SignalFlowClient.new(@api_token, @stream_endpoint)
   end
 
   protected

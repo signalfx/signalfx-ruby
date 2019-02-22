@@ -80,7 +80,7 @@ Optional constructor parameters:
   deployed on Amazon AWS.
 + **ingest_endpoint** (string): to override the target ingest API
   endpoint.
-+ **stream_endpoint** (string): to override the target stream API for SignalFlow.
++ **stream_endpoint** (string): to override the target stream endpoint for SignalFlow.
 + **timeout** (number): timeout, in seconds, for requests to SignalFx.
 + **batch_size** (number): size of datapoint batches to send to
   SignalFx.
