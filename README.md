@@ -4,7 +4,6 @@ This is a programmatic interface in Ruby for SignalFx's metadata and
 ingest APIs. It is meant to provide a base for communicating with
 SignalFx APIs that can be easily leveraged by scripts and applications
 to interact with SignalFx or report metric and event data to SignalFx.
-You will need a SignalFx account and an access token to use them.
 
 This library supports Ruby versions 2.2.x and above.
 
