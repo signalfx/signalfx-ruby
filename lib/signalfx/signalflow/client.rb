@@ -19,7 +19,7 @@ require_relative "./websocket"
 # our API reference for SignalFlow}.  Hash keys will be symbols instead of
 # strings.
 class SignalFlowClient
-  def initialize(api_token, api_endpoint, stream_endpoint)
+  def initialize(api_token, stream_endpoint)
     @transport = SignalFlowWebsocketTransport.new(api_token, stream_endpoint)
   end
 

@@ -16,13 +16,14 @@ module SignalFx
   #     and set it as `AWSUniqueId` dimension for each datapoint and event.
   #     Use this option only if your application deployed to Amazon
   # @param ingest_endpoint - string
-  # @param api_endpoint - string
+  # @param stream_endpoint - string
   # @param timeout - number
   # @param batch_size - number
   # @param user_agents - array
   def self.new(api_token,
                enable_aws_unique_id: false,
                ingest_endpoint: RbConfig::DEFAULT_INGEST_ENDPOINT,
+               stream_endpoint: RbConfig::DEFAULT_STREAM_ENDPOINT,
                timeout: RbConfig::DEFAULT_TIMEOUT,
                batch_size: RbConfig::DEFAULT_BATCH_SIZE,
                user_agents: [],
@@ -32,6 +33,7 @@ module SignalFx
       ProtoBufSignalFx.new(api_token,
                            enable_aws_unique_id: enable_aws_unique_id,
                            ingest_endpoint: ingest_endpoint,
+                           stream_endpoint: stream_endpoint,
                            timeout: timeout,
                            batch_size: batch_size,
                            user_agents: user_agents)
@@ -42,6 +44,7 @@ module SignalFx
       JsonSignalFx.new(api_token,
                        enable_aws_unique_id: enable_aws_unique_id,
                        ingest_endpoint: ingest_endpoint,
+                       stream_endpoint: stream_endpoint,
                        timeout: timeout,
                        batch_size: batch_size,
                        user_agents: user_agents)
