@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    signalfx (2.0.5)
+    signalfx (2.1.0)
       activesupport (>= 3.2)
       protobuf (>= 3.5.1)
       rest-client (~> 2.0)
