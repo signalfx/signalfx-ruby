@@ -25,7 +25,7 @@ while true do
   gauges = [{:metric => 'test.cpu', :value => counter % 10, :timestamp => timestamp}]
   counters = [{:metric => 'cpu_cnt', :value => counter % 2, :timestamp => timestamp}]
 
-  client.send(gauges: gauges, counters: counters)
+  client.transmit(gauges: gauges, counters: counters)
 
   if counter % 100 == 0
     event_type = 'deployments'
@@ -37,7 +37,7 @@ while true do
     properties = {version: version}
 
     event_category = SignalFxClient::EVENT_CATEGORIES[:ALERT]
-    client.send_event(event_type, event_category: event_category, dimensions: dimensions, properties: properties)
+    client.transmit_event(event_type, event_category: event_category, dimensions: dimensions, properties: properties)
   end
 
   counter +=1

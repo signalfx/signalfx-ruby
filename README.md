@@ -95,7 +95,7 @@ require('signalfx')
 
 client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
-client.send(
+client.transmit(
            cumulative_counters:[
              {  :metric => 'myfunc.calls_cumulative',
                 :value => 10,
@@ -141,7 +141,7 @@ require('signalfx')
 
 client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
-client.send(
+client.transmit(
           cumulative_counters:[
             {   :metric => 'myfunc.calls_cumulative',
                 :value => 10,
@@ -167,7 +167,7 @@ reporting data.
 
 ### Sending events
 
-Events can be sent to SignalFx via the `send_event()` function. The
+Events can be sent to SignalFx via the `transmit_event()` function. The
 event type must be specified, and dimensions and extra event properties
 can be supplied as well. Also please specify event category: for that
 get option from dictionary `EVENT_CATEGORIES`. Different categories of
@@ -181,7 +181,7 @@ timestamp = (Time.now.to_i * 1000).to_i
 
 client = SignalFx.new 'MY_SIGNALFX_TOKEN'
 
-client.send_event(
+client.transmit_event(
     '<event_type>',
     event_category: '<event_category>',
     dimensions: { host: 'myhost',

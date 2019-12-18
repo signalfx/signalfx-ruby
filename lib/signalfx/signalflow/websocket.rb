@@ -85,7 +85,7 @@ class SignalFlowWebsocketTransport
 
   def execute(program, start: nil, stop: nil, resolution: nil, max_delay: nil, persistent: nil, immediate: false)
     start_job do |channel_name|
-      send_msg({
+      transmit_msg({
         :type => "execute",
         :channel => channel_name,
         :program => program,
@@ -102,7 +102,7 @@ class SignalFlowWebsocketTransport
 
   def preflight(program, start, stop, resolution: nil, max_delay: nil)
     start_job do |channel_name|
-      send_msg({
+      transmit_msg({
         :type => "preflight",
         :channel => channel_name,
         :program => program,
@@ -117,7 +117,7 @@ class SignalFlowWebsocketTransport
 
   def start(program, start: nil, stop: nil, resolution: nil, max_delay: nil)
     start_job do |channel_name|
-      send_msg({
+      transmit_msg({
         :type => "start",
         :channel => channel_name,
         :program => program,
@@ -130,7 +130,7 @@ class SignalFlowWebsocketTransport
   end
 
   def stop(handle, reason)
-    send_msg({
+    transmit_msg({
       :type => "stop",
       :handle => handle,
       :reason => reason,
@@ -141,7 +141,7 @@ class SignalFlowWebsocketTransport
   def attach(handle, filters: nil, resolution: nil)
     channel = make_new_channel
 
-    send_msg({
+    transmit_msg({
       :type => "attach",
       :channel => channel.name,
       :handle => handle,
@@ -154,7 +154,7 @@ class SignalFlowWebsocketTransport
   end
 
   def detach(channel, reason=nil)
-    send_msg({
+    transmit_msg({
       :type => "detach",
       :channel => channel,
       :reason => reason,
@@ -174,7 +174,7 @@ class SignalFlowWebsocketTransport
     end
   end
 
-  def send_msg(msg)
+  def transmit_msg(msg)
     @lock.synchronize do
       if @ws.nil?
         startup_client
@@ -197,7 +197,7 @@ class SignalFlowWebsocketTransport
       @ws.send(msg)
     end
   end
-  private :send_msg
+  private :transmit_msg
 
   def on_close(msg)
     @close_reason = "(#{msg.code}, #{msg.data})"

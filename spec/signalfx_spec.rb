@@ -13,7 +13,7 @@ describe 'SignalFxClient(a.k.a abstract class)' do
     counters = [{:metric => 'cpu_cnt', :value => 2}]
 
     expect {
-      @subject.send(gauges: gauges, counters: counters)
+      @subject.transmit(gauges: gauges, counters: counters)
     }.to raise_error(RuntimeError)
   end
 
@@ -27,7 +27,7 @@ describe 'SignalFxClient(a.k.a abstract class)' do
     properties = {version: version}
 
     expect {
-      @subject.send_event(event_type, dimensions: dimensions, properties: properties)
+      @subject.transmit_event(event_type, dimensions: dimensions, properties: properties)
     }.to raise_error(RuntimeError)
   end
 end
@@ -74,7 +74,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    client.send(gauges: gauges, counters: counters)
+    client.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should be send event with all params' do
@@ -99,7 +99,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    client.send_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
+    client.transmit_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
   end
 
   it 'should be instance of SignalFxClient class' do
@@ -116,7 +116,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct float value' do
@@ -129,7 +129,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct string value' do
@@ -142,7 +142,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct data with timestamp' do
@@ -155,7 +155,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct data with dimensions' do
@@ -168,7 +168,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send event' do
@@ -187,7 +187,7 @@ describe 'SignalFx(JSON mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
+    @subject.transmit_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
   end
 end
 
@@ -217,7 +217,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    client.send(gauges: gauges, counters: counters)
+    client.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should be send datapoints with all params async' do
@@ -236,7 +236,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    client.send_async(gauges: gauges, counters: counters)
+    client.transmit_async(gauges: gauges, counters: counters)
     sleep(0.5)
   end
 
@@ -262,7 +262,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    client.send_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
+    client.transmit_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
   end
 
   it 'should send correct int value' do
@@ -275,7 +275,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct float value' do
@@ -288,7 +288,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK")
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct string value' do
@@ -301,7 +301,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct data with timestamp' do
@@ -314,7 +314,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send correct data with dimensions' do
@@ -327,7 +327,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send(gauges: gauges, counters: counters)
+    @subject.transmit(gauges: gauges, counters: counters)
   end
 
   it 'should send event' do
@@ -346,7 +346,7 @@ describe 'SignalFx(Protobuf mode)' do
                           'Accept' => /.*/, 'Accept-Encoding' => /.*/, 'Content-Length' => /\d+/}).
         to_return(:status => 200, :body => "OK", :headers => {})
 
-    @subject.send_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
+    @subject.transmit_event(event_type, dimensions: dimensions, properties: properties, timestamp: timestamp)
   end
 end
 
@@ -358,13 +358,13 @@ describe 'SignalFx(General)' do
 
   it 'Send event: throw error when event type is empty' do
     expect {
-      @subject.send_event(nil)
+      @subject.transmit_event(nil)
     }.to raise_error(RuntimeError)
   end
 
   it 'Send event: unsupported event category' do
     expect {
-      @subject.send_event('deployment', event_category: 'TEST')
+      @subject.transmit_event('deployment', event_category: 'TEST')
     }.to raise_error(RuntimeError)
   end
 end

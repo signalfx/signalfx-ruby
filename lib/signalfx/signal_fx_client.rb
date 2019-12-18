@@ -71,7 +71,7 @@ class SignalFxClient
   #                 cumulative counters to report.
   #    gauges (list): a list of dictionaries representing the gauges to report.
   #    counters (list): a list of dictionaries representing the counters to report.
-  def send(cumulative_counters: nil, gauges: nil, counters: nil)
+  def transmit(cumulative_counters: nil, gauges: nil, counters: nil)
     process_datapoint('cumulative_counter', cumulative_counters)
     process_datapoint('gauge', gauges)
     process_datapoint('counter', counters)
@@ -81,10 +81,10 @@ class SignalFxClient
       data_points_list << @queue.shift
     end
 
-    data_to_send = batch_data(data_points_list)
+    data_to_transmit = batch_data(data_points_list)
 
     begin
-      post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
+      post(data_to_transmit, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX)
     ensure
       @async_running = false
     end
@@ -97,7 +97,7 @@ class SignalFxClient
   #                 cumulative counters to report.
   #    gauges (list): a list of dictionaries representing the gauges to report.
   #    counters (list): a list of dictionaries representing the counters to report.
-  def send_async(cumulative_counters: nil, gauges: nil, counters: nil)
+  def transmit_async(cumulative_counters: nil, gauges: nil, counters: nil)
     process_datapoint('cumulative_counter', cumulative_counters)
     process_datapoint('gauge', gauges)
     process_datapoint('counter', counters)
@@ -111,14 +111,14 @@ class SignalFxClient
       data_points_list << @queue.shift
     end
 
-    data_to_send = batch_data(data_points_list)
+    data_to_transmit = batch_data(data_points_list)
 
     @async_running = true
 
     Thread.abort_on_exception = true
     Thread.start {
       begin
-        post(data_to_send, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX) {
+        post(data_to_transmit, @ingest_endpoint, INGEST_ENDPOINT_SUFFIX) {
           @async_running = false
         }
       ensure
@@ -136,7 +136,7 @@ class SignalFxClient
   #    dimensions (dict): a map of event dimensions.
   #    properties (dict): a map of extra properties on that event.
   #    timestamp (int64): a timestamp, by default is current time
-  def send_event(event_type, event_category: EVENT_CATEGORIES[:USER_DEFINED],
+  def transmit_event(event_type, event_category: EVENT_CATEGORIES[:USER_DEFINED],
                  dimensions: {}, properties: {}, timestamp: (Time.now.to_i * 1000).to_i)
     if event_type.blank?
       raise 'Type of event should not be empty!'
@@ -199,7 +199,7 @@ class SignalFxClient
 
   private
 
-  def post(data_to_send, url, suffix, &block)
+  def post(data_to_transmit, url, suffix, &block)
     begin
       http_user_agents = ''
       if @user_agents != nil && @user_agents.length > 0
@@ -214,7 +214,7 @@ class SignalFxClient
           method: :post,
           url: url + '/' + suffix,
           headers: headers,
-          payload: data_to_send,
+          payload: data_to_transmit,
           verify_ssl: OpenSSL::SSL::VERIFY_PEER,
           timeout: @timeout) { |response|
         case response.code
