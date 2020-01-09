@@ -171,8 +171,11 @@ class SignalFxClient
   #
   # @return [SignalFlowClient] a newly instantiated client, configured with the
   #   api token and endpoints from this class
-  def signalflow
-    SignalFlowClient.new(@api_token, @stream_endpoint)
+  def signalflow(proxy_url: nil, debug: false)
+    if ENV["http_proxy"] and proxy_url == nil
+      proxy_url = ENV["http_proxy"]
+    end
+    SignalFlowClient.new(@api_token, @stream_endpoint, proxy_url: proxy_url, debug: debug)
   end
 
   protected

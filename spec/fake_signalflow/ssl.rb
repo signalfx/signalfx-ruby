@@ -5,7 +5,7 @@ class SelfSignedCertificate
   def initialize
     # This randomly fails sometimes, probably due to lack of system entropy
     begin
-      @key = OpenSSL::PKey::RSA.new(1024)
+      @key = OpenSSL::PKey::RSA.new(4096)
     rescue OpenSSL::PKey::RSAError
       sleep 0.1
       retry

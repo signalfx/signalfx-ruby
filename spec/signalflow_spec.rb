@@ -206,7 +206,7 @@ describe 'SignalFlow (Websocket)' do
       client = SignalFxClient.new 'GOOD_TOKEN', :stream_endpoint => "wss://#{host}:#{ssl_port}"
       sf = client.signalflow()
 
-      expect{ sf.execute("data('cpu.utilization').publish()") }.to raise_error(OpenSSL::SSL::SSLError)
+      expect {sf.execute("data('cpu.utilization').publish()") }.to raise_error(WebsocketError)
     end
   end
 

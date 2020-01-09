@@ -129,6 +129,11 @@ actually make it to SignalFx).
 To send data through a HTTP proxy, set the environment variable `http_proxy`
 with the proxy URL.
 
+The SignalFlow client by default will use the proxy set in the `http_proxy`
+envvar by default. To send SignalFlow websocket data through a separate proxy,
+set the `proxy_url` keyword arg on the `client.signalflow` call.
+
+
 ### Sending multi-dimensional data
 
 Reporting dimensions for the data is also optional, and can be

@@ -31,7 +31,7 @@ def start_fake(host, port, use_ssl: false)
 
   # Kill it with INT to give it a chance to cleanup, if that matters
   [->(){
-    Process.kill("INT", server_pid)
+    Process.kill("TERM", server_pid)
   }, reader]
 end
 
