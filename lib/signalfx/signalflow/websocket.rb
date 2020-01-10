@@ -2,11 +2,17 @@
 
 require 'json'
 require 'thread'
-require 'websocket-client-simple'
+require 'faye/websocket'
 
 require_relative './binary'
 require_relative './channel'
 require_relative './computation'
+
+class WebsocketError < StandardError
+  def initialize(ws_err)
+    super ws_err.message
+  end
+end
 
 
 # A WebSocket transport for SignalFlow.  This should not be used directly by
@@ -17,14 +23,17 @@ class SignalFlowWebsocketTransport
   # A lower bound on the amount of time to wait for a computation to start
   COMPUTATION_START_TIMEOUT_SECONDS = 30
 
-  def initialize(api_token, stream_endpoint, logger: Logger.new(STDOUT, progname: "signalfx"))
+  def initialize(api_token, stream_endpoint, proxy_url: nil, logger: Logger.new(STDOUT, progname: "signalfx"), debug: false)
     @api_token = api_token
     @stream_endpoint = stream_endpoint
     @logger = logger
     @compress = true
+    @proxy_url = proxy_url
+    @debug = debug
 
     @lock = Mutex.new
     @close_reason = nil
+    @last_error = nil
     reinit
   end
 
@@ -188,6 +197,9 @@ class SignalFlowWebsocketTransport
           # The socket will be closed by the server if auth isn't successful
           # within 5 seconds so no point in waiting longer
           if Time.now - start_time > 5 || @close_reason
+            if @last_error
+              raise WebsocketError.new(@last_error)
+            end
             raise "Could not authenticate to SignalFlow WebSocket: #{@close_reason}"
           end
           sleep 0.1
@@ -200,7 +212,11 @@ class SignalFlowWebsocketTransport
   private :send_msg
 
   def on_close(msg)
-    @close_reason = "(#{msg.code}, #{msg.data})"
+    if @debug
+      @logger.info("Websocket on_close: #{msg}")
+    end
+
+    @close_reason = "(#{msg.code}, #{msg.reason})"
     @chan_callbacks.keys.each do |channel_name|
       invoke_callback_for_channel({ :event => "CONNECTION_CLOSED" }, channel_name)
     end
@@ -208,21 +224,31 @@ class SignalFlowWebsocketTransport
     reinit
   end
 
-  def on_message(m)
-    begin
-      return if m.type == :ping
-      if m.type == :close
-        on_close(m)
-        return
-      end
+  def on_error(e)
+    @logger.error("ERROR #{e.inspect}")
+    @last_error = e
+  end
 
-      message_received(m.data, m.type == :text)
+
+  def on_message(m)
+    if @debug
+      @logger.info("Websocket on_message: #{m}")
+    end
+
+    is_text = m.data.kind_of?(String)
+
+    begin
+      message_received(m.data, is_text)
     rescue Exception => e
       @logger.error("Error processing SignalFlow message: #{e.backtrace.first}: #{e.message} (#{e.class})")
     end
   end
 
   def on_open
+    if @debug
+      @logger.info("Websocket on_open")
+    end
+
     @ws.send({
       :type => "authenticate",
       :token => @api_token,
@@ -233,26 +259,38 @@ class SignalFlowWebsocketTransport
   # reactor.
   def startup_client
     this = self
-    WebSocket::Client::Simple.connect("#{@stream_endpoint}/v2/signalflow/connect",
-                                      # Verification is disabled by default so this is essential
-                                      {verify_mode: OpenSSL::SSL::VERIFY_PEER}) do |ws|
-      @ws = ws
-      ws.on :error do |e|
-        @logger.error("ERROR #{e.inspect}")
-      end
 
-      ws.on :close do |e|
-        this.on_close(e)
-      end
-
-      ws.on :message do |m|
-        this.on_message(m)
-      end
-
-      ws.on :open do
-        this.on_open
-      end
+    options = {
+      :tls => {
+        :verify_peer => true,
+      }
+    }
+    if @proxy_url
+      options[:proxy] = {
+       :origin  => @proxy_url,
+      }
     end
+    Thread.new {
+      EM.run {
+        @ws = Faye::WebSocket::Client.new("#{@stream_endpoint}/v2/signalflow/connect", [], options)
+        @ws.on :error do |e|
+          this.on_error(e)
+        end
+
+        @ws.on :close do |e|
+          this.on_close(e)
+          EM.stop_event_loop
+        end
+
+        @ws.on :message do |m|
+          this.on_message(m)
+        end
+
+        @ws.on :open do
+          this.on_open
+        end
+      }
+    }
   end
   private :startup_client
 
@@ -294,7 +332,8 @@ class SignalFlowWebsocketTransport
     if is_text
       JSON.parse(raw_msg, {:symbolize_names => true})
     else
-      BinaryMessageParser.parse(raw_msg)
+      # Convert the byte array to a string
+      BinaryMessageParser.parse(raw_msg.pack("c*"))
     end
   end
   private :parse_message

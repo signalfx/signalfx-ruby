@@ -35,14 +35,16 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "webmock", "~> 2.3.1"
   spec.add_development_dependency "thin", "~> 1.7"
   spec.add_development_dependency "pry"
-  spec.add_development_dependency "faye-websocket", "~> 0.10.7"
 
   # protobuf enforces this check but builds with a newer Ruby version so it's not enabled.
   # Incorporating here to allow 2.2.0-1 users to successfully build and install signalfx.
-  active_support_max_version = "< 5" if Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.2.2")
+  active_support_max_version = Gem::Version.new(RUBY_VERSION) < Gem::Version.new("2.2.2") ? "<5" : "<6"
   spec.add_dependency "activesupport", '>= 3.2', active_support_max_version
 
   spec.add_dependency "protobuf", ">= 3.5.1"
   spec.add_dependency "rest-client", "~> 2.0"
-  spec.add_dependency 'websocket-client-simple', "~> 0.3.0"
+  spec.add_dependency "faye-websocket", "~> 0.10.7"
+  spec.add_dependency "i18n", "= 1.1.0"
+  spec.add_dependency "thor", "= 0.20.0"
+
 end
