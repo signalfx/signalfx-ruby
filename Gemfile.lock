@@ -38,7 +38,7 @@ GEM
       domain_name (~> 0.5)
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
-    json (2.1.0)
+    json (2.3.1)
     method_source (0.8.2)
     middleware (0.1.0)
     mime-types (3.3.1)
