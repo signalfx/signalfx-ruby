@@ -43,7 +43,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "protobuf", ">= 3.5.1"
   spec.add_dependency "rest-client", "~> 2.0"
-  spec.add_dependency "faye-websocket", "~> 0.10.7"
+  spec.add_dependency "faye-websocket", ">= 0.10.7", "< 0.12.0"
   spec.add_dependency "i18n", "= 1.1.0"
   spec.add_dependency "thor", "= 0.20.0"
 
