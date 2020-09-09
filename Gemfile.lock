@@ -57,7 +57,7 @@ GEM
       slop (~> 3.4)
     public_suffix (3.0.2)
     rack (2.0.3)
-    rake (10.4.2)
+    rake (12.3.3)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -108,7 +108,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.17.3)
   pry
-  rake (~> 10.0)
+  rake (~> 12.3)
   rspec (~> 3.3)
   signalfx!
   simplecov
