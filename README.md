@@ -34,12 +34,12 @@ installing a more recent gem.  Building and installing signalfx from source will
 
 ### Configuring your endpoints
 
-In order to send your data to the correct realm, you may need to configure your 
-endpoints. If no endpoints are set manually, this library uses the ``us0`` realm by default. 
+In order to send your data to the correct realm, you may need to configure your
+endpoints. If no endpoints are set manually, this library uses the ``us0`` realm by default.
 If you are not in this realm, you will need to explicitly set the
 endpoint config options below. To determine if you are in a different realm and need to
-explicitly set the endpoints, check your profile page in the SignalFx 
-web application. 
+explicitly set the endpoints, check your profile page in the SignalFx
+web application.
 
 ```ruby
 require('signalfx')
@@ -210,13 +210,16 @@ now, the only supported transport mechanism is WebSockets.
 
 By default, this library connects to the `us0` stream endpoint.
 If you are not in this realm, you will need to explicitly set the
-endpoint config options below when creating the client. 
+endpoint config options below when creating the client.
 To determine if you are in a different realm and need to
 explicitly set the endpoints, check your profile page in the SignalFx web application.
 
 ```ruby
-client = SignalFx.new('ORG_TOKEN', ingest_endpoint: 'https://ingest.{REALM}.signalfx.com',
-                      stream_endpoint: 'https:/stream.{REALM}.signalfx.com')
+client = SignalFx.new(
+  'ORG_TOKEN',
+  ingest_endpoint: 'https://ingest.{REALM}.signalfx.com',
+  stream_endpoint: 'wss://stream.{REALM}.signalfx.com'
+)
 ```
 
 
@@ -228,7 +231,7 @@ signalflow = client.signalflow()
 
 For the full API see [the RubyDocs for
 the SignalFlow
-client](http://www.rubydoc.info/github/signalfx/signalfx-ruby/master/SignalFlowClient/)
+client](https://www.rubydoc.info/github/signalfx/signalfx-ruby/master/SignalFlowClient/)
 (the `signalflow` var above).
 
 There is also [a demo script](./examples/signalflow.rb) that shows basic usage.
