@@ -2,7 +2,7 @@
 
 module SignalFx
   module Version
-    VERSION = '3.1.1'
+    VERSION = '3.2.0'
     NAME = 'signalfx-ruby-client'
   end
 end
