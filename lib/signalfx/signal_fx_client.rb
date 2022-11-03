@@ -35,6 +35,9 @@ class SignalFxClient
                  timeout: RbConfig::DEFAULT_TIMEOUT,
                  batch_size: RbConfig::DEFAULT_BATCH_SIZE,
                  user_agents: [],
+                 ssl_ca_file: nil,
+                 ssl_client_cert: nil,
+                 ssl_client_key: nil,
                  logger: Logger.new(STDOUT, progname: "signalfx"))
 
     @api_token = api_token
@@ -49,6 +52,10 @@ class SignalFxClient
 
     @queue = Queue.new
     @async_running = false
+
+    @ssl_ca_file = ssl_ca_file
+    @ssl_client_cert = ssl_client_cert
+    @ssl_client_key = ssl_client_key
 
     if enable_aws_unique_id
       retrieve_aws_unique_id { |request|
@@ -213,13 +220,19 @@ class SignalFxClient
                  HEADER_API_TOKEN_KEY => @api_token,
                  HEADER_USER_AGENT_KEY => SignalFx::Version::NAME + '/' + SignalFx::Version::VERSION + http_user_agents}
 
+      ssl_args = {
+        ssl_ca_file: @ssl_ca_file,
+        ssl_client_cert: @ssl_client_cert,
+        ssl_client_key: @ssl_client_key,
+      }.compact
+
       RestClient::Request.execute(
           method: :post,
           url: url + '/' + suffix,
           headers: headers,
           payload: data_to_send,
           verify_ssl: OpenSSL::SSL::VERIFY_PEER,
-          timeout: @timeout) { |response|
+          timeout: @timeout, **ssl_args) { |response|
         case response.code
           when 200
             if block
