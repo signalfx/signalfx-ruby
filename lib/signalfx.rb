@@ -27,6 +27,9 @@ module SignalFx
                timeout: RbConfig::DEFAULT_TIMEOUT,
                batch_size: RbConfig::DEFAULT_BATCH_SIZE,
                user_agents: [],
+               ssl_ca_file: nil,
+               ssl_client_cert: nil,
+               ssl_client_key: nil,
                logger: Logger.new(STDOUT, progname: "signalfx"))
     begin
       require_relative './proto/signal_fx_protocol_buffers.pb'
@@ -36,6 +39,9 @@ module SignalFx
                            stream_endpoint: stream_endpoint,
                            timeout: timeout,
                            batch_size: batch_size,
+                           ssl_ca_file: ssl_ca_file,
+                           ssl_client_cert: ssl_client_cert,
+                           ssl_client_key: ssl_client_key,
                            user_agents: user_agents)
 
     rescue Exception => e
@@ -47,6 +53,9 @@ module SignalFx
                        stream_endpoint: stream_endpoint,
                        timeout: timeout,
                        batch_size: batch_size,
+                       ssl_ca_file: ssl_ca_file,
+                       ssl_client_cert: ssl_client_cert,
+                       ssl_client_key: ssl_client_key,
                        user_agents: user_agents)
     end
   end
